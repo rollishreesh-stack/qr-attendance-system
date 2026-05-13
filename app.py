@@ -63,6 +63,7 @@ body{
     color:white;
 }
 
+/* MAIN CARD */
 .container{
     width:90%;
     max-width:900px;
@@ -75,10 +76,12 @@ body{
     box-shadow:0px 0px 20px rgba(0,0,0,0.3);
 }
 
+/* HEADINGS */
 h1,h2,h3{
     text-align:center;
 }
 
+/* INPUTS */
 input{
     width:100%;
     padding:12px;
@@ -88,6 +91,7 @@ input{
     font-size:16px;
 }
 
+/* BUTTONS */
 button{
     width:100%;
     padding:12px;
@@ -104,12 +108,14 @@ button:hover{
     background:#1e3c72;
 }
 
+/* LINKS */
 a{
     text-decoration:none;
     color:#2a5298;
     font-weight:bold;
 }
 
+/* MENU */
 .menu{
     display:flex;
     gap:20px;
@@ -117,6 +123,7 @@ a{
     margin-bottom:20px;
 }
 
+/* CARDS */
 .card{
     background:#f5f5f5;
     padding:20px;
@@ -124,28 +131,29 @@ a{
     margin-top:20px;
 }
 
+/* TABLE FIX (IMPORTANT) */
 table{
     width:100%;
     border-collapse:collapse;
     margin-top:20px;
+    background:white;
 }
 
 th{
     background:#2a5298;
     color:white;
     padding:12px;
+    text-align:left;
 }
 
 td{
     padding:12px;
     border-bottom:1px solid #ddd;
+    color:black;   /* ✅ FIX: ensures text is visible */
+    background:white;  /* ✅ FIX: prevents blending */
 }
 
-img{
-    border-radius:20px;
-    margin-top:20px;
-}
-
+/* SUCCESS / ERROR */
 .success{
     color:green;
     font-weight:bold;
@@ -156,6 +164,11 @@ img{
     color:red;
     font-weight:bold;
     text-align:center;
+}
+
+img{
+    border-radius:20px;
+    margin-top:20px;
 }
 
 </style>
