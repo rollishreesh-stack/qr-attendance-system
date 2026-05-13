@@ -25,7 +25,7 @@ DB_NAME = "attendance.db"
 # 3. Paste credentials below
 
 SENDER_EMAIL = "SRolli@seu.edu.ge"
-SENDER_PASSWORD = "mxmjdkiuplsclcjy"
+SENDER_PASSWORD = "kqyyxhotchppqdwj"
 
 # =====================================================
 # DATABASE SETUP
@@ -80,7 +80,9 @@ def send_email(receiver_email, student_name, qr_path):
 
     try:
 
-        print(f"Sending email to {receiver_email}")
+        print("=" * 50)
+        print("STARTING EMAIL SEND")
+        print("TO:", receiver_email)
 
         msg = EmailMessage()
 
@@ -93,14 +95,11 @@ Hello {student_name},
 
 Your attendance QR code is attached.
 
-Please scan it during attendance.
-
 Regards,
 AIMCS
         """)
 
         with open(qr_path, "rb") as f:
-
             file_data = f.read()
 
         msg.add_attachment(
@@ -110,28 +109,38 @@ AIMCS
             filename=os.path.basename(qr_path)
         )
 
+        print("CONNECTING TO GMAIL SMTP")
+
         server = smtplib.SMTP_SSL(
             "smtp.gmail.com",
             465
         )
+
+        print("LOGGING IN")
 
         server.login(
             SENDER_EMAIL,
             SENDER_PASSWORD
         )
 
+        print("SENDING MESSAGE")
+
         server.send_message(msg)
 
         server.quit()
 
-        print(f"SUCCESS: Email sent to {receiver_email}")
+        print("EMAIL SUCCESSFULLY SENT")
+        print("=" * 50)
 
         return True
 
     except Exception as e:
 
+        print("=" * 50)
         print("EMAIL FAILED")
+        print(type(e))
         print(e)
+        print("=" * 50)
 
         return False
 
