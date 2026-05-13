@@ -30,7 +30,10 @@ def home():
 
         name = request.form["name"]
 
-        time = datetime.datetime.now()
+        from datetime import datetime, timedelta, timezone
+    tbilisi_time = datetime.utcnow() + timedelta(hours=4)
+    time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
+
 
         with open("attendance.csv", "a", newline="") as file:
 
