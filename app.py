@@ -12,6 +12,10 @@ app.secret_key = "supersecretkey"
 
 DB_NAME = "attendance.db"
 
+# ---------------- ADMIN CONFIG (CHANGE PASSWORD HERE) ----------------
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "newpassword123"   # 👈 CHANGE THIS ANY TIME
+
 # ---------------- DATABASE SETUP ----------------
 def init_db():
 
@@ -54,7 +58,6 @@ def load_user(user_id):
 # ---------------- GLOBAL STYLE ----------------
 STYLE = """
 <style>
-
 body{
     font-family: Arial;
     background: linear-gradient(135deg,#1e3c72,#2a5298);
@@ -63,7 +66,6 @@ body{
     color:white;
 }
 
-/* MAIN CARD */
 .container{
     width:90%;
     max-width:900px;
@@ -76,12 +78,8 @@ body{
     box-shadow:0px 0px 20px rgba(0,0,0,0.3);
 }
 
-/* HEADINGS */
-h1,h2,h3{
-    text-align:center;
-}
+h1,h2,h3{text-align:center;}
 
-/* INPUTS */
 input{
     width:100%;
     padding:12px;
@@ -91,7 +89,6 @@ input{
     font-size:16px;
 }
 
-/* BUTTONS */
 button{
     width:100%;
     padding:12px;
@@ -104,18 +101,10 @@ button{
     cursor:pointer;
 }
 
-button:hover{
-    background:#1e3c72;
-}
+button:hover{background:#1e3c72;}
 
-/* LINKS */
-a{
-    text-decoration:none;
-    color:#2a5298;
-    font-weight:bold;
-}
+a{text-decoration:none;color:#2a5298;font-weight:bold;}
 
-/* MENU */
 .menu{
     display:flex;
     gap:20px;
@@ -123,7 +112,6 @@ a{
     margin-bottom:20px;
 }
 
-/* CARDS */
 .card{
     background:#f5f5f5;
     padding:20px;
@@ -131,7 +119,6 @@ a{
     margin-top:20px;
 }
 
-/* TABLE FIX (IMPORTANT) */
 table{
     width:100%;
     border-collapse:collapse;
@@ -149,58 +136,34 @@ th{
 td{
     padding:12px;
     border-bottom:1px solid #ddd;
-    color:black;   /* ✅ FIX: ensures text is visible */
-    background:white;  /* ✅ FIX: prevents blending */
+    color:black;
+    background:white;
 }
 
-/* SUCCESS / ERROR */
-.success{
-    color:green;
-    font-weight:bold;
-    text-align:center;
-}
-
-.error{
-    color:red;
-    font-weight:bold;
-    text-align:center;
-}
+.success{color:green;font-weight:bold;text-align:center;}
+.error{color:red;font-weight:bold;text-align:center;}
 
 img{
     border-radius:20px;
     margin-top:20px;
 }
-
 </style>
 """
 
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
-
     return f"""
     {STYLE}
-
     <div class='container'>
-
-    <h1>🎓 PRO QR Attendance System</h1>
-
-    <div class='card'>
-
-    <h3>Smart Attendance Platform</h3>
-
-    <p>
-    Scan QR codes to mark attendance instantly.
-    </p>
-
-    <center>
-    <a href='/login'>
-    <button>Admin Login</button>
-    </a>
-    </center>
-
-    </div>
-
+        <h1>🎓 PRO QR Attendance System</h1>
+        <div class='card'>
+            <h3>Smart Attendance Platform</h3>
+            <p>Scan QR codes to mark attendance instantly.</p>
+            <center>
+                <a href='/login'><button>Admin Login</button></a>
+            </center>
+        </div>
     </div>
     """
 
@@ -213,44 +176,28 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        if username == "admin" and password == "admin123":
-
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             user = User(1)
             login_user(user)
-
             return redirect("/dashboard")
 
         return f"""
         {STYLE}
-
         <div class='container'>
-
-        <h2 class='error'>Invalid Username or Password</h2>
-
-        <a href='/login'>
-        <button>Try Again</button>
-        </a>
-
+            <h2 class='error'>Invalid Username or Password</h2>
+            <a href='/login'><button>Try Again</button></a>
         </div>
         """
 
     return f"""
     {STYLE}
-
     <div class='container'>
-
-    <h1>🔐 Admin Login</h1>
-
-    <form method='POST'>
-
-    <input name='username' placeholder='Username' required>
-
-    <input type='password' name='password' placeholder='Password' required>
-
-    <button type='submit'>Login</button>
-
-    </form>
-
+        <h1>🔐 Admin Login</h1>
+        <form method='POST'>
+            <input name='username' placeholder='Username' required>
+            <input type='password' name='password' placeholder='Password' required>
+            <button type='submit'>Login</button>
+        </form>
     </div>
     """
 
@@ -258,9 +205,7 @@ def login():
 @app.route("/logout")
 @login_required
 def logout():
-
     logout_user()
-
     return redirect("/login")
 
 # ---------------- ADD STUDENT ----------------
@@ -271,71 +216,45 @@ def add_student():
     if request.method == "POST":
 
         name = request.form["name"]
-
         token = secrets.token_hex(8)
 
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
 
-        c.execute(
-            "INSERT INTO students (name, token) VALUES (?, ?)",
-            (name, token)
-        )
+        c.execute("INSERT INTO students (name, token) VALUES (?, ?)", (name, token))
 
         conn.commit()
         conn.close()
 
-        # Generate QR
         base_url = request.host_url + "mark/" + token
-
         img = qrcode.make(base_url)
 
         if not os.path.exists("static"):
             os.makedirs("static")
 
         file_path = f"static/{name}.png"
-
         img.save(file_path)
 
         return f"""
         {STYLE}
-
         <div class='container'>
-
-        <h1>✅ Student Added</h1>
-
-        <div class='card'>
-
-        <h3>{name}</h3>
-
-        <center>
-        <img src='/{file_path}' width='250'>
-        </center>
-
-        </div>
-
-        <a href='/dashboard'>
-        <button>Back to Dashboard</button>
-        </a>
-
+            <h1>✅ Student Added</h1>
+            <div class='card'>
+                <h3>{name}</h3>
+                <center><img src='/{file_path}' width='250'></center>
+            </div>
+            <a href='/dashboard'><button>Back to Dashboard</button></a>
         </div>
         """
 
     return f"""
     {STYLE}
-
     <div class='container'>
-
-    <h1>➕ Add Student</h1>
-
-    <form method='POST'>
-
-    <input name='name' placeholder='Student Name' required>
-
-    <button type='submit'>Generate QR</button>
-
-    </form>
-
+        <h1>➕ Add Student</h1>
+        <form method='POST'>
+            <input name='name' placeholder='Student Name' required>
+            <button type='submit'>Generate QR</button>
+        </form>
     </div>
     """
 
@@ -346,30 +265,16 @@ def mark(token):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute(
-        "SELECT name FROM students WHERE token = ?",
-        (token,)
-    )
-
+    c.execute("SELECT name FROM students WHERE token = ?", (token,))
     student = c.fetchone()
 
     if not student:
         conn.close()
-
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h2 class='error'>❌ Invalid QR Code</h2>
-
-        </div>
-        """
+        return f"{STYLE}<div class='container'><h2 class='error'>❌ Invalid QR Code</h2></div>"
 
     name = student[0]
 
     tbilisi_time = datetime.utcnow() + timedelta(hours=4)
-
     time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
 
     c.execute("""
@@ -378,46 +283,23 @@ def mark(token):
         AND date(time) = date('now', '+4 hours')
     """, (name,))
 
-    existing = c.fetchone()
-
-    if existing:
+    if c.fetchone():
         conn.close()
+        return f"{STYLE}<div class='container'><h2 class='error'>⚠️ Already marked today!</h2></div>"
 
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h2 class='error'>
-        ⚠️ {name} already marked attendance today!
-        </h2>
-
-        </div>
-        """
-
-    c.execute(
-        "INSERT INTO attendance (name, time) VALUES (?, ?)",
-        (name, time_string)
-    )
+    c.execute("INSERT INTO attendance (name, time) VALUES (?, ?)", (name, time_string))
 
     conn.commit()
     conn.close()
 
     return f"""
     {STYLE}
-
     <div class='container'>
-
-    <h1 class='success'>✅ Attendance Marked</h1>
-
-    <div class='card'>
-
-    <h3>Name: {name}</h3>
-
-    <h3>Time: {time_string}</h3>
-
-    </div>
-
+        <h1 class='success'>✅ Attendance Marked</h1>
+        <div class='card'>
+            <h3>Name: {name}</h3>
+            <h3>Time: {time_string}</h3>
+        </div>
     </div>
     """
 
@@ -436,36 +318,22 @@ def dashboard():
 
     html = f"""
     {STYLE}
-
     <div class='container'>
+        <h1>📊 Admin Dashboard</h1>
 
-    <h1>📊 Admin Dashboard</h1>
+        <div class='menu'>
+            <a href='/add_student'><button>➕ Add Student</button></a>
+            <a href='/download'><button>⬇️ Download Excel</button></a>
+            <a href='/analytics'><button>📈 Analytics</button></a>
+            <a href='/logout'><button>🚪 Logout</button></a>
+        </div>
 
-    <div class='menu'>
-
-    <a href='/add_student'><button>➕ Add Student</button></a>
-    <a href='/download'><button>⬇️ Download Excel</button></a>
-    <a href='/analytics'><button>📈 Analytics</button></a>
-    <a href='/logout'><button>🚪 Logout</button></a>
-
-    </div>
-
-    <table>
-
-    <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Time</th>
-    </tr>
+        <table>
+            <tr><th>Name</th><th>Date</th><th>Time</th></tr>
     """
 
-    for row in rows:
-        name = row[0]
-        full_time = row[1]   # "2026-05-13 18:45:12"
-
-        # split into date + time
-        date_part = full_time.split(" ")[0]
-        time_part = full_time.split(" ")[1]
+    for name, full_time in rows:
+        date_part, time_part = full_time.split(" ")
 
         html += f"""
         <tr>
@@ -475,11 +343,7 @@ def dashboard():
         </tr>
         """
 
-    html += """
-    </table>
-
-    </div>
-    """
+    html += "</table></div>"
 
     return html
 
@@ -489,14 +353,9 @@ def dashboard():
 def download():
 
     conn = sqlite3.connect(DB_NAME)
-
-    df = pd.read_sql_query(
-        "SELECT * FROM attendance",
-        conn
-    )
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
 
     file_name = "attendance.xlsx"
-
     df.to_excel(file_name, index=False)
 
     conn.close()
@@ -512,7 +371,6 @@ def analytics():
     c = conn.cursor()
 
     c.execute("SELECT COUNT(*) FROM attendance")
-
     total = c.fetchone()[0]
 
     c.execute("""
@@ -522,48 +380,27 @@ def analytics():
     """)
 
     rows = c.fetchall()
-
     conn.close()
 
     html = f"""
     {STYLE}
-
     <div class='container'>
+        <h1>📈 Analytics</h1>
 
-    <h1>📈 Attendance Analytics</h1>
+        <div class='card'>
+            <h2>Total Entries: {total}</h2>
+        </div>
 
-    <div class='card'>
-
-    <h2>Total Attendance Entries: {total}</h2>
-
-    </div>
-
-    <table>
-
-    <tr>
-        <th>Name</th>
-        <th>Total Count</th>
-    </tr>
+        <table>
+            <tr><th>Name</th><th>Count</th></tr>
     """
 
-    for row in rows:
-
-        html += f"""
-        <tr>
-            <td>{row[0]}</td>
-            <td>{row[1]}</td>
-        </tr>
-        """
+    for name, count in rows:
+        html += f"<tr><td>{name}</td><td>{count}</td></tr>"
 
     html += """
-    </table>
-
-    <br>
-
-    <a href='/dashboard'>
-    <button>⬅️ Back Dashboard</button>
-    </a>
-
+        </table>
+        <a href='/dashboard'><button>⬅️ Back</button></a>
     </div>
     """
 
