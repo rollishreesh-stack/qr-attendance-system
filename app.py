@@ -1,59 +1,42 @@
-from flask import Flask, request, render_template_string
-import csv
-import datetime
-import qrcode
+from flask import Flask, request
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# Generate QR Code Automatically
-url = "https://qr-attendance-system-th3j.onrender.com"
-
-img = qrcode.make(url)
-img.save("static/attendance_qr.png")
-
-HTML = """
-<h1>QR Attendance System</h1>
-
-<form method="POST">
-
-    <input type="text" name="name" placeholder="Enter Your Name" required>
-
-    <button type="submit">Mark Attendance</button>
-
-</form>
-"""
-
+# Home page (attendance form)
 @app.route("/", methods=["GET", "POST"])
 def home():
-
     if request.method == "POST":
-
         name = request.form["name"]
 
-        from datetime import datetime, timedelta, timezone
-    tbilisi_time = datetime.utcnow() + timedelta(hours=4)
-    time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
+        # ✅ FIXED TIME (Georgia = UTC +4)
+        tbilisi_time = datetime.utcnow() + timedelta(hours=4)
+        time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
 
+        # Save attendance
+        with open("attendance.csv", "a") as f:
+            f.write(f"{name},{time_string}\n")
 
-        with open("attendance.csv", "a", newline="") as file:
+        return f"Attendance marked for {name} at {time_string}"
 
-            writer = csv.writer(file)
+    return """
+    <h2>QR Attendance System</h2>
+    <form method="POST">
+        <input name="name" placeholder="Enter Name" required>
+        <button type="submit">Mark Attendance</button>
+    </form>
+    """
 
-            writer.writerow([name, time])
-
-        return f"<h2>Attendance Marked for {name}</h2>"
-
-    return render_template_string(HTML)
-
+# View attendance data
 @app.route("/data")
 def data():
-    with open("attendance.csv", "r") as f:
-        return "<pre>" + f.read() + "</pre>"
+    try:
+        with open("attendance.csv", "r") as f:
+            return "<pre>" + f.read() + "</pre>"
+    except:
+        return "No attendance data yet"
 
-@app.route("/check")
-def check():
-    with open("attendance.csv", "a") as f:
-        f.write("TEST_ENTRY\n")
-    return "written"
+# Run app
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
 
-app.run(host="0.0.0.0", port=5001)
