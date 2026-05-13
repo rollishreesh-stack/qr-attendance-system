@@ -54,6 +54,114 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id)
 
+# ---------------- GLOBAL STYLE ----------------
+STYLE = """
+<style>
+
+body{
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+    color:#fff;
+}
+
+/* MAIN CONTAINER */
+.container{
+    width:90%;
+    max-width:1100px;
+    margin:40px auto;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+
+/* HEADINGS */
+h1,h2,h3{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+/* BUTTONS */
+button{
+    padding:12px 18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    background: linear-gradient(45deg,#3b82f6,#06b6d4);
+    color:white;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
+    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+/* MENU */
+.menu{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:20px;
+}
+
+/* CARDS */
+.card{
+    background: rgba(255,255,255,0.12);
+    padding:15px;
+    border-radius:15px;
+    margin:10px 0;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+    overflow:hidden;
+    border-radius:12px;
+}
+
+th{
+    background:#2563eb;
+    padding:12px;
+    text-align:left;
+}
+
+td{
+    padding:12px;
+    background:rgba(255,255,255,0.08);
+}
+
+/* LINKS */
+a{
+    color:#60a5fa;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+a:hover{
+    color:white;
+}
+
+/* STATUS */
+.success{
+    color:#22c55e;
+    font-weight:bold;
+}
+
+.error{
+    color:#ef4444;
+    font-weight:bold;
+}
+
+</style>
+"""
+
 # ================= SECURITY (QR ENCRYPTION) =================
 def generate_secure_token(name):
     raw = name + str(datetime.utcnow()) + secrets.token_hex(5)
@@ -169,23 +277,34 @@ def dashboard():
     df = pd.read_sql_query("SELECT * FROM attendance", conn)
     conn.close()
 
-    html = """
-    <h1>PRO DASHBOARD</h1>
+    html = f"""
+{STYLE}
 
-    <a href='/graph'>Graph</a> |
-    <a href='/download'>Excel</a> |
-    <a href='/logout'>Logout</a>
+<div class='container'>
 
-    <table border='1'>
-    <tr><th>Name</th><th>Date</th><th>Time</th><th>Status</th></tr>
-    """
+<h1>📊 Smart Attendance Dashboard</h1>
 
-    for _, r in df.iterrows():
-        html += f"<tr><td>{r['name']}</td><td>{r['date']}</td><td>{r['time']}</td><td>{r['status']}</td></tr>"
+<div class='menu'>
 
-    html += "</table>"
+<a href='/add_student'><button>➕ Add Student</button></a>
+<a href='/graph'><button>📈 Graph</button></a>
+<a href='/download'><button>⬇️ Excel</button></a>
+<a href='/logout'><button>🚪 Logout</button></a>
 
-    return html
+</div>
+
+<div class='card'>
+<h3>Live Attendance Records</h3>
+</div>
+
+<table>
+<tr>
+<th>Name</th>
+<th>Date</th>
+<th>Time</th>
+<th>Status</th>
+</tr>
+"""
 
 # ================= EXCEL DOWNLOAD =================
 @app.route("/download")
