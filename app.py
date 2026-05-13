@@ -3,6 +3,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import sqlite3
 from datetime import datetime, timedelta
 import pandas as pd
+import secrets
+import qrcode
+import os
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -11,14 +14,25 @@ DB_NAME = "attendance.db"
 
 # ---------------- DATABASE SETUP ----------------
 def init_db():
+
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
+    # Attendance table
     c.execute("""
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             time TEXT
+        )
+    """)
+
+    # Student table
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            token TEXT UNIQUE
         )
     """)
 
@@ -39,18 +53,20 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id)
 
-# ---------------- HOME PAGE ----------------
+# ---------------- HOME ----------------
 @app.route("/")
 def home():
     return """
-    <h1>QR Attendance System</h1>
+    <h1>PRO QR Attendance System</h1>
 
-    <p>Scan QR code to mark attendance</p>
+    <p>Scan QR to mark attendance</p>
+
+    <br>
 
     <a href='/login'>Admin Login</a>
     """
 
-# ---------------- ADMIN LOGIN ----------------
+# ---------------- LOGIN ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -59,7 +75,6 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        # CHANGE THESE LATER
         if username == "admin" and password == "admin123":
 
             user = User(1)
@@ -96,24 +111,90 @@ def logout():
 
     return redirect("/login")
 
+# ---------------- ADD STUDENT ----------------
+@app.route("/add_student", methods=["GET", "POST"])
+@login_required
+def add_student():
+
+    if request.method == "POST":
+
+        name = request.form["name"]
+
+        token = secrets.token_hex(8)
+
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+
+        c.execute(
+            "INSERT INTO students (name, token) VALUES (?, ?)",
+            (name, token)
+        )
+
+        conn.commit()
+        conn.close()
+
+        # Generate QR
+        base_url = request.host_url + "mark/" + token
+
+        img = qrcode.make(base_url)
+
+        if not os.path.exists("static"):
+            os.makedirs("static")
+
+        file_path = f"static/{name}.png"
+
+        img.save(file_path)
+
+        return f"""
+        <h2>Student Added Successfully</h2>
+
+        <p>Name: {name}</p>
+
+        <p>QR Generated:</p>
+
+        <img src='/{file_path}' width='250'>
+        """
+
+    return """
+    <h2>Add Student</h2>
+
+    <form method="POST">
+
+        <input name="name" placeholder="Student Name" required>
+
+        <br><br>
+
+        <button type="submit">Generate QR</button>
+
+    </form>
+    """
+
 # ---------------- MARK ATTENDANCE ----------------
-@app.route("/mark")
-def mark():
-
-    name = request.args.get("name")
-
-    if not name:
-        return "No name provided"
-
-    # Georgia Time (UTC +4)
-    tbilisi_time = datetime.utcnow() + timedelta(hours=4)
-
-    time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
+@app.route("/mark/<token>")
+def mark(token):
 
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    # Prevent duplicate attendance for same day
+    c.execute(
+        "SELECT name FROM students WHERE token = ?",
+        (token,)
+    )
+
+    student = c.fetchone()
+
+    if not student:
+        conn.close()
+        return "Invalid QR code"
+
+    name = student[0]
+
+    # Georgia Time UTC+4
+    tbilisi_time = datetime.utcnow() + timedelta(hours=4)
+
+    time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Prevent duplicate attendance same day
     c.execute("""
         SELECT * FROM attendance
         WHERE name = ?
@@ -143,7 +224,7 @@ def mark():
     <p>Time: {time_string}</p>
     """
 
-# ---------------- ADMIN DASHBOARD ----------------
+# ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -151,7 +232,9 @@ def dashboard():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute("SELECT name, time FROM attendance ORDER BY id DESC")
+    c.execute(
+        "SELECT name, time FROM attendance ORDER BY id DESC"
+    )
 
     rows = c.fetchall()
 
@@ -160,7 +243,15 @@ def dashboard():
     html = """
     <h1>Admin Dashboard</h1>
 
+    <a href='/add_student'>Add Student + Generate QR</a>
+
+    <br><br>
+
     <a href='/download'>Download Excel Report</a>
+
+    <br><br>
+
+    <a href='/analytics'>Attendance Analytics</a>
 
     <br><br>
 
@@ -176,11 +267,12 @@ def dashboard():
     </tr>
     """
 
-    for r in rows:
+    for row in rows:
+
         html += f"""
         <tr>
-            <td>{r[0]}</td>
-            <td>{r[1]}</td>
+            <td>{row[0]}</td>
+            <td>{row[1]}</td>
         </tr>
         """
 
@@ -188,7 +280,7 @@ def dashboard():
 
     return html
 
-# ---------------- DOWNLOAD EXCEL ----------------
+# ---------------- EXCEL DOWNLOAD ----------------
 @app.route("/download")
 @login_required
 def download():
@@ -208,7 +300,53 @@ def download():
 
     return send_file(file_name, as_attachment=True)
 
+# ---------------- ANALYTICS ----------------
+@app.route("/analytics")
+@login_required
+def analytics():
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*) FROM attendance")
+    total = c.fetchone()[0]
+
+    c.execute("""
+        SELECT name, COUNT(*)
+        FROM attendance
+        GROUP BY name
+    """)
+
+    rows = c.fetchall()
+
+    conn.close()
+
+    html = f"""
+    <h1>Attendance Analytics</h1>
+
+    <h3>Total Attendance Entries: {total}</h3>
+
+    <table border='1' cellpadding='10'>
+
+    <tr>
+        <th>Name</th>
+        <th>Total Count</th>
+    </tr>
+    """
+
+    for row in rows:
+
+        html += f"""
+        <tr>
+            <td>{row[0]}</td>
+            <td>{row[1]}</td>
+        </tr>
+        """
+
+    html += "</table>"
+
+    return html
+
 # ---------------- RUN APP ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
