@@ -1,7 +1,6 @@
-Flask
-Flask-Login
-pandas
-qrcode
-Pillow
-openpyxl
-gunicorn
+Flask==3.1.0
+Flask-Login==0.6.3
+pandas==2.2.3
+openpyxl==3.1.5
+qrcode==8.2
+Pillow==11.2.1
