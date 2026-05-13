@@ -47,4 +47,10 @@ def data():
     with open("attendance.csv", "r") as f:
         return "<pre>" + f.read() + "</pre>"
 
+@app.route("/check")
+def check():
+    with open("attendance.csv", "a") as f:
+        f.write("TEST_ENTRY\n")
+    return "written"
+
 app.run(host="0.0.0.0", port=5001)
