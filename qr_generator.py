@@ -1,17 +1,9 @@
 import qrcode
 
-data_list = [
-    "https://google.com",
-    "https://youtube.com",
-    "https://openai.com"
-]
+base_url = "https://your-app.onrender.com/mark?name="
 
-for i, data in enumerate(data_list):
+students = ["John", "Alice", "Bob"]
 
-    img = qrcode.make(data)
-
-    filename = f"qr_{i+1}.png"
-
-    img.save(filename)
-
-    print(f"{filename} created!")
+for student in students:
+    img = qrcode.make(base_url + student)
+    img.save(f"{student}.png")
