@@ -15,11 +15,21 @@ app.secret_key = "supersecretkey"
 
 DB_NAME = "attendance.db"
 
-# ================= EMAIL CONFIG =================
-SENDER_EMAIL = "SRolli@seu.edu.ge"
-SENDER_PASSWORD = "kqyy xhot chpp qdwj"
+# =====================================================
+# EMAIL CONFIG
+# =====================================================
+# IMPORTANT:
+# 1. Enable 2-Step Verification in Gmail
+# 2. Generate App Password:
+# https://myaccount.google.com/apppasswords
+# 3. Paste credentials below
 
-# ================= DATABASE =================
+SENDER_EMAIL = "SRolli@seu.edu.ge"
+SENDER_PASSWORD = "mxmjdkiuplsclcjy"
+
+# =====================================================
+# DATABASE SETUP
+# =====================================================
 def init_db():
 
     conn = sqlite3.connect(DB_NAME)
@@ -47,7 +57,9 @@ def init_db():
 
 init_db()
 
-# ================= LOGIN =================
+# =====================================================
+# LOGIN SYSTEM
+# =====================================================
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -61,10 +73,14 @@ def load_user(user_id):
 
     return User(user_id)
 
-# ================= EMAIL FUNCTION =================
+# =====================================================
+# SEND EMAIL FUNCTION
+# =====================================================
 def send_email(receiver_email, student_name, qr_path):
 
     try:
+
+        print(f"Sending email to {receiver_email}")
 
         msg = EmailMessage()
 
@@ -75,9 +91,9 @@ def send_email(receiver_email, student_name, qr_path):
         msg.set_content(f"""
 Hello {student_name},
 
-Your QR Code for attendance is attached.
+Your attendance QR code is attached.
 
-Please keep it safe.
+Please scan it during attendance.
 
 Regards,
 AIMCS
@@ -94,26 +110,34 @@ AIMCS
             filename=os.path.basename(qr_path)
         )
 
-        with smtplib.SMTP_SSL(
+        server = smtplib.SMTP_SSL(
             "smtp.gmail.com",
-            465,
-            timeout=10
-        ) as smtp:
+            465
+        )
 
-            smtp.login(
-                SENDER_EMAIL,
-                SENDER_PASSWORD
-            )
+        server.login(
+            SENDER_EMAIL,
+            SENDER_PASSWORD
+        )
 
-            smtp.send_message(msg)
+        server.send_message(msg)
 
-        print("EMAIL SENT:", receiver_email)
+        server.quit()
+
+        print(f"SUCCESS: Email sent to {receiver_email}")
+
+        return True
 
     except Exception as e:
 
-        print("EMAIL ERROR:", e)
+        print("EMAIL FAILED")
+        print(e)
 
-# ================= MODERN UI =================
+        return False
+
+# =====================================================
+# MODERN PROFESSIONAL UI
+# =====================================================
 STYLE = """
 <style>
 
@@ -135,7 +159,6 @@ body{
     text-align:center;
     font-size:28px;
     font-weight:bold;
-    letter-spacing:1px;
     box-shadow:0 4px 10px rgba(0,0,0,0.3);
 }
 
@@ -158,11 +181,11 @@ body{
 
 .hero{
     text-align:center;
-    padding:40px;
+    padding:45px;
 }
 
 .hero h1{
-    font-size:48px;
+    font-size:50px;
     color:#2563eb;
 }
 
@@ -174,7 +197,7 @@ body{
 
 textarea{
     width:100%;
-    height:250px;
+    height:260px;
     margin-top:20px;
     border-radius:15px;
     border:1px solid #cbd5e1;
@@ -241,6 +264,7 @@ th{
 td{
     padding:14px;
     border-bottom:1px solid #e2e8f0;
+    color:black;
 }
 
 .success{
@@ -254,6 +278,7 @@ td{
     color:red;
     font-weight:bold;
     text-align:center;
+    font-size:24px;
 }
 
 .footer{
@@ -262,10 +287,20 @@ td{
     color:#94a3b8;
 }
 
+.info-box{
+    background:#eff6ff;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+    color:black;
+}
+
 </style>
 """
 
-# ================= HOME =================
+# =====================================================
+# HOME
+# =====================================================
 @app.route("/")
 def home():
 
@@ -283,7 +318,7 @@ def home():
             <h1>Professional Attendance Platform</h1>
 
             <p>
-            Bulk QR Generation • Email Automation • Smart Analytics
+            Bulk QR Generation • Smart Analytics • Auto Email System
             </p>
 
             <a href='/login'>
@@ -297,7 +332,9 @@ def home():
     </div>
     """
 
-# ================= LOGIN =================
+# =====================================================
+# LOGIN
+# =====================================================
 @app.route("/login", methods=["GET","POST"])
 def login():
 
@@ -353,7 +390,9 @@ def login():
     </div>
     """
 
-# ================= LOGOUT =================
+# =====================================================
+# LOGOUT
+# =====================================================
 @app.route("/logout")
 @login_required
 def logout():
@@ -362,7 +401,9 @@ def logout():
 
     return redirect("/login")
 
-# ================= DASHBOARD =================
+# =====================================================
+# DASHBOARD
+# =====================================================
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -390,7 +431,7 @@ def dashboard():
     {STYLE}
 
     <div class='navbar'>
-        📊 Dashboard
+        📊 Admin Dashboard
     </div>
 
     <div class='container'>
@@ -425,7 +466,7 @@ def dashboard():
 
             <a href='/download_qrs'>
                 <button>
-                    🧾 Download All QR Codes
+                    🧾 Download All QR Codes ZIP
                 </button>
             </a>
 
@@ -473,7 +514,7 @@ def dashboard():
         </div>
 
         <div class='footer'>
-            AIMCS Attendance Management System
+            AIMCS Professional Attendance System
         </div>
 
     </div>
@@ -481,7 +522,9 @@ def dashboard():
 
     return html
 
-# ================= BULK GENERATOR =================
+# =====================================================
+# BULK QR GENERATOR
+# =====================================================
 @app.route("/bulk_generate", methods=["GET","POST"])
 @login_required
 def bulk_generate():
@@ -490,7 +533,7 @@ def bulk_generate():
 
         data = request.form["students"]
 
-        lines = data.strip().split("\n")
+        lines = data.strip().split("\\n")
 
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
@@ -499,12 +542,17 @@ def bulk_generate():
             os.makedirs("static/qrcodes")
 
         success = 0
+        failed = 0
 
         for line in lines:
 
             try:
 
                 parts = line.split(",")
+
+                if len(parts) < 2:
+                    failed += 1
+                    continue
 
                 name = parts[0].strip()
                 email = parts[1].strip()
@@ -521,20 +569,33 @@ def bulk_generate():
 
                 img = qrcode.make(qr_link)
 
-                safe_name = name.replace(" ","_")
+                safe_name = (
+                    name.replace(" ","_")
+                    .replace("/","")
+                    .replace("\\\\","")
+                )
 
                 qr_path = f"static/qrcodes/{safe_name}.png"
 
                 img.save(qr_path)
 
                 # SEND EMAIL
-                send_email(email,name,qr_path)
+                mail_status = send_email(
+                    email,
+                    name,
+                    qr_path
+                )
 
-                success += 1
+                if mail_status:
+                    success += 1
+                else:
+                    failed += 1
 
             except Exception as e:
 
                 print("ERROR:",e)
+
+                failed += 1
 
         conn.commit()
         conn.close()
@@ -547,16 +608,35 @@ def bulk_generate():
             <div class='card'>
 
                 <h1 class='success'>
-                ✅ {success} QR Codes Generated
+                ✅ {success} Emails Sent Successfully
                 </h1>
 
-                <p style='text-align:center;margin-top:20px;'>
-                QR Codes mailed successfully.
-                </p>
+                <h2 style='text-align:center;margin-top:15px;color:red;'>
+                ❌ Failed: {failed}
+                </h2>
+
+                <div class='info-box'>
+
+                    <h3>Check Terminal Logs</h3>
+
+                    <p style='margin-top:10px;'>
+                    If emails failed, verify:
+                    </p>
+
+                    <ul style='margin-top:10px;padding-left:20px;'>
+
+                        <li>Gmail App Password</li>
+                        <li>2-Step Verification Enabled</li>
+                        <li>Correct Email Address</li>
+                        <li>Internet Connection</li>
+
+                    </ul>
+
+                </div>
 
                 <a href='/dashboard'>
                     <button>
-                    ⬅ Back Dashboard
+                        ⬅ Back Dashboard
                     </button>
                 </a>
 
@@ -577,22 +657,24 @@ def bulk_generate():
         <div class='card'>
 
             <h1 style='text-align:center;'>
-            Paste Students Data
+            Paste Student Data
             </h1>
 
-            <p style='text-align:center;margin-top:15px;color:#475569;'>
+            <div class='info-box'>
 
-            Format:
+                <h3>Paste Format:</h3>
 
-            <br><br>
+                <p style='margin-top:10px;'>
 
-            John,john@gmail.com
-            <br>
-            Sarah,sarah@gmail.com
-            <br>
-            Mike,mike@gmail.com
+                John,john@gmail.com
+                <br>
+                Sarah,sarah@gmail.com
+                <br>
+                Mike,mike@gmail.com
 
-            </p>
+                </p>
+
+            </div>
 
             <form method='POST'>
 
@@ -603,7 +685,7 @@ def bulk_generate():
                 ></textarea>
 
                 <button type='submit'>
-                    🚀 Generate & Mail All QR Codes
+                    🚀 Generate & Send All QR Codes
                 </button>
 
             </form>
@@ -613,7 +695,9 @@ def bulk_generate():
     </div>
     """
 
-# ================= DOWNLOAD QRS =================
+# =====================================================
+# DOWNLOAD ALL QR ZIP
+# =====================================================
 @app.route("/download_qrs")
 @login_required
 def download_qrs():
@@ -632,7 +716,9 @@ def download_qrs():
 
     return send_file(zip_name,as_attachment=True)
 
-# ================= MARK ATTENDANCE =================
+# =====================================================
+# MARK ATTENDANCE
+# =====================================================
 @app.route("/mark/<token>")
 def mark(token):
 
@@ -690,7 +776,7 @@ def mark(token):
             <div class='card'>
 
                 <h1 class='error'>
-                Attendance Already Marked
+                Attendance Already Marked Today
                 </h1>
 
             </div>
@@ -730,7 +816,9 @@ def mark(token):
     </div>
     """
 
-# ================= DOWNLOAD EXCEL =================
+# =====================================================
+# DOWNLOAD ATTENDANCE EXCEL
+# =====================================================
 @app.route("/download")
 @login_required
 def download():
@@ -753,7 +841,9 @@ def download():
         as_attachment=True
     )
 
-# ================= RUN =================
+# =====================================================
+# RUN
+# =====================================================
 if __name__ == "__main__":
 
     app.run(
