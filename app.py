@@ -14,7 +14,7 @@ DB_NAME = "attendance.db"
 
 # ---------------- ADMIN CONFIG (CHANGE PASSWORD HERE) ----------------
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "newpassword123"   # 👈 CHANGE THIS ANY TIME
+ADMIN_PASSWORD = "AIMCS@2026Secure"   # 👈 CHANGE THIS ANY TIME
 
 # ---------------- DATABASE SETUP ----------------
 def init_db():
