@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_file
+from flask import Flask, request, redirect, send_file, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import sqlite3
 from datetime import datetime, timedelta
@@ -6,25 +6,18 @@ import pandas as pd
 import secrets
 import qrcode
 import os
+import hashlib
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-DB_NAME = "attendance.db"
+DB = "attendance.db"
 
-# ---------------- DATABASE SETUP ----------------
+# ================= DATABASE =================
 def init_db():
-
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
-
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS attendance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            time TEXT
-        )
-    """)
 
     c.execute("""
         CREATE TABLE IF NOT EXISTS students (
@@ -34,12 +27,22 @@ def init_db():
         )
     """)
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            date TEXT,
+            time TEXT,
+            status TEXT
+        )
+    """)
+
     conn.commit()
     conn.close()
 
 init_db()
 
-# ---------------- LOGIN SYSTEM ----------------
+# ================= LOGIN SYSTEM =================
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -51,524 +54,176 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id)
 
-# ---------------- GLOBAL STYLE ----------------
-STYLE = """
-<style>
+# ================= SECURITY (QR ENCRYPTION) =================
+def generate_secure_token(name):
+    raw = name + str(datetime.utcnow()) + secrets.token_hex(5)
+    return hashlib.sha256(raw.encode()).hexdigest()
 
-body{
-    font-family: Arial;
-    background: linear-gradient(135deg,#1e3c72,#2a5298);
-    margin:0;
-    padding:0;
-    color:white;
-}
-
-/* MAIN CARD */
-.container{
-    width:90%;
-    max-width:900px;
-    margin:auto;
-    margin-top:40px;
-    background:white;
-    color:black;
-    padding:30px;
-    border-radius:20px;
-    box-shadow:0px 0px 20px rgba(0,0,0,0.3);
-}
-
-/* HEADINGS */
-h1,h2,h3{
-    text-align:center;
-}
-
-/* INPUTS */
-input{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    font-size:16px;
-}
-
-/* BUTTONS */
-button{
-    width:100%;
-    padding:12px;
-    margin-top:20px;
-    background:#2a5298;
-    color:white;
-    border:none;
-    border-radius:10px;
-    font-size:16px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#1e3c72;
-}
-
-/* LINKS */
-a{
-    text-decoration:none;
-    color:#2a5298;
-    font-weight:bold;
-}
-
-/* MENU */
-.menu{
-    display:flex;
-    gap:20px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-}
-
-/* CARDS */
-.card{
-    background:#f5f5f5;
-    padding:20px;
-    border-radius:15px;
-    margin-top:20px;
-}
-
-/* TABLE FIX (IMPORTANT) */
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-    background:white;
-}
-
-th{
-    background:#2a5298;
-    color:white;
-    padding:12px;
-    text-align:left;
-}
-
-td{
-    padding:12px;
-    border-bottom:1px solid #ddd;
-    color:black;   /* ✅ FIX: ensures text is visible */
-    background:white;  /* ✅ FIX: prevents blending */
-}
-
-/* SUCCESS / ERROR */
-.success{
-    color:green;
-    font-weight:bold;
-    text-align:center;
-}
-
-.error{
-    color:red;
-    font-weight:bold;
-    text-align:center;
-}
-
-img{
-    border-radius:20px;
-    margin-top:20px;
-}
-
-</style>
-"""
-
-# ---------------- HOME ----------------
+# ================= HOME =================
 @app.route("/")
 def home():
+    return "<h1>QR Attendance PRO System</h1><a href='/login'>Admin Login</a>"
 
-    return f"""
-    {STYLE}
-
-    <div class='container'>
-
-    <h1>🎓 PRO QR Attendance System</h1>
-
-    <div class='card'>
-
-    <h3>Smart Attendance Platform</h3>
-
-    <p>
-    Scan QR codes to mark attendance instantly.
-    </p>
-
-    <center>
-    <a href='/login'>
-    <button>Admin Login</button>
-    </a>
-    </center>
-
-    </div>
-
-    </div>
-    """
-
-# ---------------- LOGIN ----------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
-
-    if request.method == "POST":
-
-        username = request.form["username"]
-        password = request.form["password"]
-
-        if username == "admin" and password == "admin123":
-
-            user = User(1)
-            login_user(user)
-
-            return redirect("/dashboard")
-
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h2 class='error'>Invalid Username or Password</h2>
-
-        <a href='/login'>
-        <button>Try Again</button>
-        </a>
-
-        </div>
-        """
-
-    return f"""
-    {STYLE}
-
-    <div class='container'>
-
-    <h1>🔐 Admin Login</h1>
-
-    <form method='POST'>
-
-    <input name='username' placeholder='Username' required>
-
-    <input type='password' name='password' placeholder='Password' required>
-
-    <button type='submit'>Login</button>
-
-    </form>
-
-    </div>
-    """
-
-# ---------------- LOGOUT ----------------
-@app.route("/logout")
-@login_required
-def logout():
-
-    logout_user()
-
-    return redirect("/login")
-
-# ---------------- ADD STUDENT ----------------
-@app.route("/add_student", methods=["GET", "POST"])
+# ================= ADD STUDENT (QR GENERATION) =================
+@app.route("/add_student", methods=["POST"])
 @login_required
 def add_student():
 
-    if request.method == "POST":
+    name = request.form["name"]
+    token = generate_secure_token(name)
 
-        name = request.form["name"]
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
 
-        token = secrets.token_hex(8)
+    c.execute("INSERT INTO students (name, token) VALUES (?,?)", (name, token))
+    conn.commit()
+    conn.close()
 
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
+    qr_url = request.host_url + "mark/" + token
 
-        c.execute(
-            "INSERT INTO students (name, token) VALUES (?, ?)",
-            (name, token)
-        )
+    img = qrcode.make(qr_url)
 
-        conn.commit()
-        conn.close()
+    if not os.path.exists("static"):
+        os.makedirs("static")
 
-        # Generate QR
-        base_url = request.host_url + "mark/" + token
+    path = f"static/{name}.png"
+    img.save(path)
 
-        img = qrcode.make(base_url)
+    return jsonify({
+        "name": name,
+        "qr": path,
+        "token": token
+    })
 
-        if not os.path.exists("static"):
-            os.makedirs("static")
-
-        file_path = f"static/{name}.png"
-
-        img.save(file_path)
-
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h1>✅ Student Added</h1>
-
-        <div class='card'>
-
-        <h3>{name}</h3>
-
-        <center>
-        <img src='/{file_path}' width='250'>
-        </center>
-
-        </div>
-
-        <a href='/dashboard'>
-        <button>Back to Dashboard</button>
-        </a>
-
-        </div>
-        """
-
-    return f"""
-    {STYLE}
-
-    <div class='container'>
-
-    <h1>➕ Add Student</h1>
-
-    <form method='POST'>
-
-    <input name='name' placeholder='Student Name' required>
-
-    <button type='submit'>Generate QR</button>
-
-    </form>
-
-    </div>
-    """
-
-# ---------------- MARK ATTENDANCE ----------------
+# ================= MARK ATTENDANCE =================
 @app.route("/mark/<token>")
 def mark(token):
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
 
-    c.execute(
-        "SELECT name FROM students WHERE token = ?",
-        (token,)
-    )
+    c.execute("SELECT name FROM students WHERE token=?", (token,))
+    user = c.fetchone()
 
-    student = c.fetchone()
+    if not user:
+        return "Invalid QR"
 
-    if not student:
-        conn.close()
+    name = user[0]
 
-        return f"""
-        {STYLE}
+    now = datetime.utcnow() + timedelta(hours=4)
 
-        <div class='container'>
+    date = now.date().strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
 
-        <h2 class='error'>❌ Invalid QR Code</h2>
+    status = "LATE" if now.hour >= 9 else "ON TIME"
 
-        </div>
-        """
-
-    name = student[0]
-
-    tbilisi_time = datetime.utcnow() + timedelta(hours=4)
-
-    time_string = tbilisi_time.strftime("%Y-%m-%d %H:%M:%S")
-
-    c.execute("""
-        SELECT * FROM attendance
-        WHERE name = ?
-        AND date(time) = date('now', '+4 hours')
-    """, (name,))
-
-    existing = c.fetchone()
-
-    if existing:
-        conn.close()
-
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h2 class='error'>
-        ⚠️ {name} already marked attendance today!
-        </h2>
-
-        </div>
-        """
+    # prevent duplicate
+    c.execute("SELECT * FROM attendance WHERE name=? AND date=?", (name, date))
+    if c.fetchone():
+        return "Already marked today"
 
     c.execute(
-        "INSERT INTO attendance (name, time) VALUES (?, ?)",
-        (name, time_string)
+        "INSERT INTO attendance (name, date, time, status) VALUES (?,?,?,?)",
+        (name, date, time, status)
     )
 
     conn.commit()
     conn.close()
 
-    return f"""
-    {STYLE}
+    return f"{name} marked {status} at {time}"
 
-    <div class='container'>
+# ================= API (MOBILE APP READY) =================
+@app.route("/api/attendance")
+def api():
 
-    <h1 class='success'>✅ Attendance Marked</h1>
+    conn = sqlite3.connect(DB)
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
+    return jsonify(df.to_dict(orient="records"))
 
-    <div class='card'>
+# ================= ATTENDANCE GRAPH =================
+@app.route("/graph")
+@login_required
+def graph():
 
-    <h3>Name: {name}</h3>
+    conn = sqlite3.connect(DB)
+    df = pd.read_sql_query("SELECT name FROM attendance", conn)
+    conn.close()
 
-    <h3>Time: {time_string}</h3>
+    counts = df["name"].value_counts()
 
-    </div>
+    plt.figure()
+    counts.plot(kind="bar")
+    plt.title("Attendance Graph")
 
-    </div>
-    """
+    file = "static/graph.png"
+    plt.savefig(file)
 
-# ---------------- DASHBOARD ----------------
+    return send_file(file, mimetype="image/png")
+
+# ================= DASHBOARD =================
 @app.route("/dashboard")
 @login_required
 def dashboard():
 
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-
-    c.execute("SELECT name, time FROM attendance ORDER BY id DESC")
-    rows = c.fetchall()
-
+    conn = sqlite3.connect(DB)
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
     conn.close()
 
-    html = f"""
-    {STYLE}
+    html = """
+    <h1>PRO DASHBOARD</h1>
 
-    <div class='container'>
+    <a href='/graph'>Graph</a> |
+    <a href='/download'>Excel</a> |
+    <a href='/logout'>Logout</a>
 
-    <h1>📊 Admin Dashboard</h1>
-
-    <div class='menu'>
-
-    <a href='/add_student'><button>➕ Add Student</button></a>
-    <a href='/download'><button>⬇️ Download Excel</button></a>
-    <a href='/analytics'><button>📈 Analytics</button></a>
-    <a href='/logout'><button>🚪 Logout</button></a>
-
-    </div>
-
-    <table>
-
-    <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Time</th>
-    </tr>
+    <table border='1'>
+    <tr><th>Name</th><th>Date</th><th>Time</th><th>Status</th></tr>
     """
 
-    for row in rows:
-        name = row[0]
-        full_time = row[1]   # "2026-05-13 18:45:12"
+    for _, r in df.iterrows():
+        html += f"<tr><td>{r['name']}</td><td>{r['date']}</td><td>{r['time']}</td><td>{r['status']}</td></tr>"
 
-        # split into date + time
-        date_part = full_time.split(" ")[0]
-        time_part = full_time.split(" ")[1]
-
-        html += f"""
-        <tr>
-            <td>{name}</td>
-            <td>{date_part}</td>
-            <td>{time_part}</td>
-        </tr>
-        """
-
-    html += """
-    </table>
-
-    </div>
-    """
+    html += "</table>"
 
     return html
 
-# ---------------- DOWNLOAD ----------------
+# ================= EXCEL DOWNLOAD =================
 @app.route("/download")
 @login_required
 def download():
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
 
-    df = pd.read_sql_query(
-        "SELECT * FROM attendance",
-        conn
-    )
+    file = "attendance.xlsx"
+    df.to_excel(file, index=False)
 
-    file_name = "attendance.xlsx"
+    return send_file(file, as_attachment=True)
 
-    df.to_excel(file_name, index=False)
+# ================= FACE RECOGNITION READY HOOK =================
+@app.route("/face")
+def face():
+    return "Face recognition module ready (connect OpenCV / DeepFace here)"
 
-    conn.close()
+# ================= LOGIN =================
+@app.route("/login", methods=["GET", "POST"])
+def login():
 
-    return send_file(file_name, as_attachment=True)
+    if request.method == "POST":
+        if request.form["username"] == "admin":
+            user = User(1)
+            login_user(user)
+            return redirect("/dashboard")
 
-# ---------------- ANALYTICS ----------------
-@app.route("/analytics")
+    return "<form method='POST'><input name='username'><button>Login</button></form>"
+
+# ================= LOGOUT =================
+@app.route("/logout")
 @login_required
-def analytics():
+def logout():
+    logout_user()
+    return redirect("/login")
 
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-
-    c.execute("SELECT COUNT(*) FROM attendance")
-
-    total = c.fetchone()[0]
-
-    c.execute("""
-        SELECT name, COUNT(*)
-        FROM attendance
-        GROUP BY name
-    """)
-
-    rows = c.fetchall()
-
-    conn.close()
-
-    html = f"""
-    {STYLE}
-
-    <div class='container'>
-
-    <h1>📈 Attendance Analytics</h1>
-
-    <div class='card'>
-
-    <h2>Total Attendance Entries: {total}</h2>
-
-    </div>
-
-    <table>
-
-    <tr>
-        <th>Name</th>
-        <th>Total Count</th>
-    </tr>
-    """
-
-    for row in rows:
-
-        html += f"""
-        <tr>
-            <td>{row[0]}</td>
-            <td>{row[1]}</td>
-        </tr>
-        """
-
-    html += """
-    </table>
-
-    <br>
-
-    <a href='/dashboard'>
-    <button>⬅️ Back Dashboard</button>
-    </a>
-
-    </div>
-    """
-
-    return html
-
-# ---------------- RUN ----------------
+# ================= RUN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
