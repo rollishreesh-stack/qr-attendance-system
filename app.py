@@ -429,10 +429,7 @@ def dashboard():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute(
-        "SELECT name, time FROM attendance ORDER BY id DESC"
-    )
-
+    c.execute("SELECT name, time FROM attendance ORDER BY id DESC")
     rows = c.fetchall()
 
     conn.close()
@@ -446,21 +443,10 @@ def dashboard():
 
     <div class='menu'>
 
-    <a href='/add_student'>
-    <button>➕ Add Student</button>
-    </a>
-
-    <a href='/download'>
-    <button>⬇️ Download Excel</button>
-    </a>
-
-    <a href='/analytics'>
-    <button>📈 Analytics</button>
-    </a>
-
-    <a href='/logout'>
-    <button>🚪 Logout</button>
-    </a>
+    <a href='/add_student'><button>➕ Add Student</button></a>
+    <a href='/download'><button>⬇️ Download Excel</button></a>
+    <a href='/analytics'><button>📈 Analytics</button></a>
+    <a href='/logout'><button>🚪 Logout</button></a>
 
     </div>
 
@@ -468,16 +454,24 @@ def dashboard():
 
     <tr>
         <th>Name</th>
+        <th>Date</th>
         <th>Time</th>
     </tr>
     """
 
     for row in rows:
+        name = row[0]
+        full_time = row[1]   # "2026-05-13 18:45:12"
+
+        # split into date + time
+        date_part = full_time.split(" ")[0]
+        time_part = full_time.split(" ")[1]
 
         html += f"""
         <tr>
-            <td>{row[0]}</td>
-            <td>{row[1]}</td>
+            <td>{name}</td>
+            <td>{date_part}</td>
+            <td>{time_part}</td>
         </tr>
         """
 
