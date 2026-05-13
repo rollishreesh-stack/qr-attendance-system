@@ -4,6 +4,6 @@ base_url = "https://your-app.onrender.com/mark?name="
 
 students = ["John", "Alice", "Bob"]
 
-for student in students:
-    img = qrcode.make(base_url + student)
-    img.save(f"{student}.png")
+for s in students:
+    img = qrcode.make(base_url + s)
+    img.save(f"{s}.png")
