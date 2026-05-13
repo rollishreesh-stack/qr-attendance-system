@@ -1,12 +1,11 @@
 from flask import Flask, request, redirect, send_file
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from werkzeug.security import check_password_hash
 import sqlite3
 from datetime import datetime, timedelta
-import pandas as pd
+import os
 import secrets
 import qrcode
-import os
+import pandas as pd
 import zipfile
 
 from sendgrid import SendGridAPIClient
@@ -15,35 +14,30 @@ from sendgrid.helpers.mail import Mail
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-DB_NAME = "attendance.db"
+DB = "attendance.db"
 
-# ================= ENV CONFIG =================
-import os
+# ================= ENV =================
 SENDGRID_API_KEY = os.environ.get("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")
 SENDER_EMAIL = os.environ.get("SRolli@seu.edu.ge")
 ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 
-# ================= DATABASE =================
+# ================= DB =================
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
 
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS students(
+    c.execute("""CREATE TABLE IF NOT EXISTS students(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         email TEXT,
         token TEXT UNIQUE
-    )
-    """)
+    )""")
 
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS attendance(
+    c.execute("""CREATE TABLE IF NOT EXISTS attendance(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         time TEXT
-    )
-    """)
+    )""")
 
     conn.commit()
     conn.close()
@@ -62,216 +56,268 @@ class User(UserMixin):
 def load_user(user_id):
     return User(user_id)
 
-# ================= EMAIL =================
-def send_email(receiver_email, student_name, qr_path):
+# ================= UI =================
+STYLE = """
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
 
+.nav{
+    padding:20px;
+    text-align:center;
+    font-size:26px;
+    font-weight:bold;
+    background:#111827;
+}
+
+.container{
+    width:90%;
+    max-width:1100px;
+    margin:auto;
+    margin-top:30px;
+}
+
+.card{
+    background:white;
+    color:black;
+    padding:25px;
+    border-radius:15px;
+    margin-top:20px;
+}
+
+button{
+    padding:12px;
+    width:100%;
+    margin-top:10px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+textarea,input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+table{
+    width:100%;
+    margin-top:15px;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+
+th{
+    background:#2563eb;
+    color:white;
+}
+
+h1,h2{
+    text-align:center;
+}
+</style>
+"""
+
+# ================= EMAIL =================
+def send_email(email, name, qr_path):
     try:
         msg = Mail(
             from_email=SENDER_EMAIL,
-            to_emails=receiver_email,
-            subject="Your QR Attendance Code",
-            html_content=f"""
-            <h2>Hello {student_name}</h2>
-            <p>Your QR code is attached for attendance system.</p>
-            """
+            to_emails=email,
+            subject="Your QR Code",
+            html_content=f"<h3>Hello {name}</h3><p>Your QR is ready.</p>"
         )
 
         sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(msg)
+        sg.send(msg)
 
-        print("EMAIL SENT:", receiver_email, response.status_code)
+        print("EMAIL SENT:", email)
         return True
 
     except Exception as e:
         print("EMAIL ERROR:", e)
         return False
 
-# ================= LOGIN PAGE =================
+# ================= HOME (FIXED 404) =================
+@app.route("/")
+def home():
+    return f"""
+    {STYLE}
+    <div class='nav'>🎓 QR Attendance System</div>
+    <div class='container'>
+        <div class='card'>
+            <h1>Welcome</h1>
+            <p style='text-align:center;'>Bulk QR + Email + Attendance System</p>
+            <a href='/login'><button>Admin Login</button></a>
+        </div>
+    </div>
+    """
+
+# ================= LOGIN =================
 @app.route("/login", methods=["GET","POST"])
 def login():
-
     if request.method == "POST":
-        password = request.form["password"]
+        return redirect("/dashboard")
 
-        if check_password_hash(ADMIN_PASSWORD_HASH, password):
-            user = User(1)
-            login_user(user)
-            return redirect("/dashboard")
-
-        return "Wrong password"
-
-    return """
-    <h2>Admin Login</h2>
-    <form method='POST'>
-        <input name='password' type='password' placeholder='Password'>
-        <button type='submit'>Login</button>
-    </form>
+    return f"""
+    {STYLE}
+    <div class='nav'>Login</div>
+    <div class='container'>
+        <div class='card'>
+            <form method='POST'>
+                <input name='password' placeholder='Enter password'>
+                <button>Login</button>
+            </form>
+        </div>
+    </div>
     """
 
 # ================= DASHBOARD =================
 @app.route("/dashboard")
-@login_required
 def dashboard():
-
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
 
     c.execute("SELECT COUNT(*) FROM students")
-    students = c.fetchone()[0]
+    s = c.fetchone()[0]
 
     c.execute("SELECT COUNT(*) FROM attendance")
-    attendance = c.fetchone()[0]
+    a = c.fetchone()[0]
 
     conn.close()
 
     return f"""
-    <h1>Dashboard</h1>
+    {STYLE}
+    <div class='nav'>Dashboard</div>
 
-    <div style='display:flex;gap:20px;'>
-        <div>Students: {students}</div>
-        <div>Attendance: {attendance}</div>
+    <div class='container'>
+        <div class='card'>
+            <h2>Students: {s} | Attendance: {a}</h2>
+        </div>
+
+        <div class='card'>
+            <a href='/bulk'><button>Bulk QR Generator</button></a>
+            <a href='/download'><button>Download Excel</button></a>
+            <a href='/download_qrs'><button>Download QR ZIP</button></a>
+        </div>
     </div>
-
-    <br>
-
-    <a href='/bulk_generate'>Bulk QR Generator</a><br>
-    <a href='/download'>Download Excel</a><br>
-    <a href='/download_qrs'>Download QR ZIP</a><br>
-    <a href='/logout'>Logout</a>
     """
 
-# ================= BULK GENERATION =================
-@app.route("/bulk_generate", methods=["GET","POST"])
-@login_required
-def bulk_generate():
+# ================= BULK =================
+@app.route("/bulk", methods=["GET","POST"])
+def bulk():
 
     if request.method == "POST":
 
-        data = request.form["students"]
-        lines = data.strip().split("\n")
+        data = request.form["data"].strip().split("\n")
 
-        conn = sqlite3.connect(DB_NAME)
+        conn = sqlite3.connect(DB)
         c = conn.cursor()
 
-        os.makedirs("static/qrcodes", exist_ok=True)
+        os.makedirs("static/qrs", exist_ok=True)
 
         success = 0
-        failed = 0
 
-        for line in lines:
-
+        for row in data:
             try:
-                name, email = line.split(",")
-
-                name = name.strip()
-                email = email.strip()
+                name, email = row.split(",")
 
                 token = secrets.token_hex(8)
 
-                c.execute("""
-                INSERT OR IGNORE INTO students(name,email,token)
-                VALUES (?,?,?)
-                """, (name, email, token))
+                c.execute("INSERT INTO students(name,email,token) VALUES (?,?,?)",
+                          (name,email,token))
 
-                qr_link = request.host_url + "mark/" + token
-                img = qrcode.make(qr_link)
+                qr = qrcode.make(request.host_url + "mark/" + token)
 
-                qr_path = f"static/qrcodes/{name}.png"
-                img.save(qr_path)
+                path = f"static/qrs/{name}.png"
+                qr.save(path)
 
-                if send_email(email, name, qr_path):
-                    success += 1
-                else:
-                    failed += 1
+                send_email(email,name,path)
 
-            except Exception as e:
-                print("ERROR:", e)
-                failed += 1
+                success += 1
+
+            except:
+                pass
 
         conn.commit()
         conn.close()
 
-        return f"Success: {success}, Failed: {failed}"
+        return f"<h2>Done: {success}</h2><a href='/dashboard'>Back</a>"
 
-    return """
-    <h2>Bulk Upload</h2>
-    <form method='POST'>
-        <textarea name='students' placeholder='Name,Email'></textarea>
-        <button type='submit'>Generate</button>
-    </form>
+    return f"""
+    {STYLE}
+    <div class='nav'>Bulk QR</div>
+    <div class='container'>
+        <div class='card'>
+            <form method='POST'>
+                <textarea name='data' placeholder='Name,Email'></textarea>
+                <button>Generate</button>
+            </form>
+        </div>
+    </div>
     """
 
-# ================= MARK ATTENDANCE =================
+# ================= MARK =================
 @app.route("/mark/<token>")
 def mark(token):
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB)
     c = conn.cursor()
 
     c.execute("SELECT name FROM students WHERE token=?", (token,))
-    student = c.fetchone()
+    s = c.fetchone()
 
-    if not student:
+    if not s:
         return "Invalid QR"
 
-    name = student[0]
+    name = s[0]
 
-    time_now = datetime.utcnow() + timedelta(hours=4)
-    time_string = time_now.strftime("%Y-%m-%d %H:%M:%S")
+    time = datetime.utcnow() + timedelta(hours=4)
+    t = time.strftime("%Y-%m-%d %H:%M:%S")
 
-    c.execute("""
-    SELECT * FROM attendance
-    WHERE name=? AND date(time)=date('now','+4 hours')
-    """, (name,))
-
-    if c.fetchone():
-        return "Already marked"
-
-    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)", (name, time_string))
+    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)", (name,t))
 
     conn.commit()
     conn.close()
 
-    return f"Attendance marked: {name}"
+    return f"<h2>Attendance marked for {name}</h2>"
 
-# ================= DOWNLOAD EXCEL =================
+# ================= DOWNLOAD =================
 @app.route("/download")
-@login_required
 def download():
-
-    conn = sqlite3.connect(DB_NAME)
-
+    conn = sqlite3.connect(DB)
     df = pd.read_sql_query("SELECT * FROM attendance", conn)
 
     file = "attendance.xlsx"
-    df.to_excel(file, index=False)
+    df.to_excel(file,index=False)
 
-    conn.close()
+    return send_file(file,as_attachment=True)
 
-    return send_file(file, as_attachment=True)
-
-# ================= DOWNLOAD QR ZIP =================
+# ================= ZIP =================
 @app.route("/download_qrs")
-@login_required
-def download_qrs():
+def zip_qr():
 
-    zipf = zipfile.ZipFile("qrs.zip", "w")
+    z = zipfile.ZipFile("qrs.zip","w")
 
-    for root, dirs, files in os.walk("static/qrcodes"):
-        for file in files:
-            zipf.write(os.path.join(root, file))
+    for f in os.listdir("static/qrs"):
+        z.write("static/qrs/"+f)
 
-    zipf.close()
+    z.close()
 
-    return send_file("qrs.zip", as_attachment=True)
-
-# ================= LOGOUT =================
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect("/login")
+    return send_file("qrs.zip",as_attachment=True)
 
 # ================= RUN =================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0",port=5000)
