@@ -7,8 +7,8 @@ import secrets
 import qrcode
 import os
 import smtplib
-import zipfile
 from email.message import EmailMessage
+import zipfile
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -16,13 +16,8 @@ app.secret_key = "supersecretkey"
 DB_NAME = "attendance.db"
 
 # ---------------- EMAIL CONFIG ----------------
-# IMPORTANT:
-# Use your Gmail + App Password
-# Generate App Password:
-# https://myaccount.google.com/apppasswords
-
-SENDER_EMAIL = "YOUR_EMAIL@gmail.com"
-SENDER_PASSWORD = "YOUR_APP_PASSWORD"
+SENDER_EMAIL = "SRolli@seu.edu.ge"
+SENDER_PASSWORD = "kqyy xhot chpp qdwj"
 
 # ---------------- DATABASE SETUP ----------------
 def init_db():
@@ -30,7 +25,6 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    # attendance table
     c.execute("""
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +33,6 @@ def init_db():
         )
     """)
 
-    # students table
     c.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,9 +73,7 @@ def send_email(receiver_email, student_name, qr_path):
         msg.set_content(f"""
 Hello {student_name},
 
-Attached is your personal attendance QR Code.
-
-Please keep it safe and scan it during attendance.
+Your attendance QR code is attached.
 
 Regards,
 AIMCS
@@ -98,152 +89,142 @@ AIMCS
             filename=os.path.basename(qr_path)
         )
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as smtp:
             smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
             smtp.send_message(msg)
 
-        return True
+        print("EMAIL SENT:", receiver_email)
 
     except Exception as e:
         print("EMAIL ERROR:", e)
-        return False
 
-# ---------------- GLOBAL STYLE ----------------
+# ---------------- PROFESSIONAL UI ----------------
 STYLE = """
 <style>
 
 body{
-    font-family: Arial;
-    background: linear-gradient(135deg,#1e3c72,#2a5298);
     margin:0;
     padding:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
     color:white;
 }
 
-/* MAIN CARD */
+.navbar{
+    background:#111827;
+    padding:20px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
 .container{
     width:90%;
-    max-width:1000px;
+    max-width:1200px;
     margin:auto;
-    margin-top:40px;
+    margin-top:30px;
     background:white;
     color:black;
     padding:30px;
     border-radius:20px;
-    box-shadow:0px 0px 20px rgba(0,0,0,0.3);
+    box-shadow:0px 0px 25px rgba(0,0,0,0.3);
 }
 
-/* HEADINGS */
 h1,h2,h3{
     text-align:center;
 }
 
-/* INPUTS */
-input{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    font-size:16px;
+.card{
+    background:#f8fafc;
+    padding:25px;
+    border-radius:18px;
+    margin-top:20px;
+    box-shadow:0px 5px 10px rgba(0,0,0,0.08);
 }
 
-/* BUTTONS */
 button{
     width:100%;
-    padding:12px;
-    margin-top:20px;
-    background:#2a5298;
-    color:white;
+    padding:14px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
     font-size:16px;
+    margin-top:15px;
     cursor:pointer;
     transition:0.3s;
-}
-
-button:hover{
-    background:#1e3c72;
-    transform:scale(1.02);
-}
-
-/* LINKS */
-a{
-    text-decoration:none;
-    color:#2a5298;
     font-weight:bold;
 }
 
-/* MENU */
-.menu{
-    display:flex;
-    gap:20px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
+button:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
 }
 
-/* CARDS */
-.card{
-    background:#f5f5f5;
-    padding:20px;
-    border-radius:15px;
-    margin-top:20px;
+input{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border-radius:10px;
+    border:1px solid #cbd5e1;
+    font-size:16px;
 }
 
-/* TABLE */
 table{
     width:100%;
     border-collapse:collapse;
     margin-top:20px;
-    background:white;
 }
 
 th{
-    background:#2a5298;
+    background:#2563eb;
     color:white;
-    padding:12px;
-    text-align:left;
+    padding:14px;
 }
 
 td{
     padding:12px;
     border-bottom:1px solid #ddd;
-    color:black;
-    background:white;
 }
 
-/* SUCCESS / ERROR */
-.success{
-    color:green;
-    font-weight:bold;
-    text-align:center;
-}
-
-.error{
-    color:red;
-    font-weight:bold;
-    text-align:center;
-}
-
-img{
-    border-radius:20px;
-    margin-top:20px;
+.menu{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-top:25px;
 }
 
 .stats{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
     gap:20px;
-    margin-top:20px;
 }
 
 .stat-card{
-    background:#2a5298;
+    background:#2563eb;
     color:white;
     padding:25px;
-    border-radius:15px;
+    border-radius:18px;
     text-align:center;
-    box-shadow:0px 5px 15px rgba(0,0,0,0.2);
+}
+
+.success{
+    color:green;
+    text-align:center;
+    font-weight:bold;
+}
+
+.error{
+    color:red;
+    text-align:center;
+    font-weight:bold;
+}
+
+.footer{
+    text-align:center;
+    margin-top:30px;
+    color:#94a3b8;
 }
 
 </style>
@@ -256,25 +237,25 @@ def home():
     return f"""
     {STYLE}
 
+    <div class='navbar'>
+        🎓 AIMCS QR Attendance System
+    </div>
+
     <div class='container'>
 
-    <h1>🎓 PRO QR Attendance System</h1>
+        <div class='card'>
 
-    <div class='card'>
+            <h1>Smart Attendance Management</h1>
 
-    <h3>Smart Attendance Platform</h3>
+            <p style='text-align:center;font-size:18px;'>
+            Bulk QR Generation • Email Automation • Attendance Analytics
+            </p>
 
-    <p>
-    Scan QR codes to mark attendance instantly.
-    </p>
+            <a href='/login'>
+                <button>🔐 Admin Login</button>
+            </a>
 
-    <center>
-    <a href='/login'>
-    <button>Admin Login</button>
-    </a>
-    </center>
-
-    </div>
+        </div>
 
     </div>
     """
@@ -290,8 +271,7 @@ def login():
 
         if username == "admin" and password == "admin123":
 
-            user = User(1)
-            login_user(user)
+            login_user(User(1))
 
             return redirect("/dashboard")
 
@@ -299,32 +279,34 @@ def login():
         {STYLE}
 
         <div class='container'>
-
-        <h2 class='error'>Invalid Username or Password</h2>
-
-        <a href='/login'>
-        <button>Try Again</button>
-        </a>
-
+            <h2 class='error'>Invalid Credentials</h2>
         </div>
         """
 
     return f"""
     {STYLE}
 
+    <div class='navbar'>
+        🔐 Admin Portal
+    </div>
+
     <div class='container'>
 
-    <h1>🔐 Admin Login</h1>
+        <div class='card'>
 
-    <form method='POST'>
+            <h1>Login</h1>
 
-    <input name='username' placeholder='Username' required>
+            <form method='POST'>
 
-    <input type='password' name='password' placeholder='Password' required>
+                <input name='username' placeholder='Username' required>
 
-    <button type='submit'>Login</button>
+                <input type='password' name='password' placeholder='Password' required>
 
-    </form>
+                <button type='submit'>Login</button>
+
+            </form>
+
+        </div>
 
     </div>
     """
@@ -338,90 +320,119 @@ def logout():
 
     return redirect("/login")
 
-# ---------------- ADD SINGLE STUDENT ----------------
-@app.route("/add_student", methods=["GET", "POST"])
+# ---------------- DASHBOARD ----------------
+@app.route("/dashboard")
 @login_required
-def add_student():
+def dashboard():
 
-    if request.method == "POST":
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
 
-        name = request.form["name"]
-        email = request.form["email"]
+    c.execute("SELECT COUNT(*) FROM students")
+    total_students = c.fetchone()[0]
 
-        token = secrets.token_hex(8)
+    c.execute("SELECT COUNT(*) FROM attendance")
+    total_attendance = c.fetchone()[0]
 
-        conn = sqlite3.connect(DB_NAME)
-        c = conn.cursor()
+    c.execute("""
+        SELECT name, time
+        FROM attendance
+        ORDER BY id DESC
+    """)
 
-        c.execute(
-            "INSERT INTO students (name, email, token) VALUES (?, ?, ?)",
-            (name, email, token)
-        )
+    rows = c.fetchall()
 
-        conn.commit()
-        conn.close()
+    conn.close()
 
-        # QR generation
-        base_url = request.host_url + "mark/" + token
-
-        img = qrcode.make(base_url)
-
-        if not os.path.exists("static/qrcodes"):
-            os.makedirs("static/qrcodes")
-
-        safe_name = name.replace(" ", "_")
-
-        file_path = f"static/qrcodes/{safe_name}.png"
-
-        img.save(file_path)
-
-        # send email
-        send_email(email, name, file_path)
-
-        return f"""
-        {STYLE}
-
-        <div class='container'>
-
-        <h1>✅ Student Added</h1>
-
-        <div class='card'>
-
-        <h3>{name}</h3>
-        <h3>{email}</h3>
-
-        <center>
-        <img src='/{file_path}' width='250'>
-        </center>
-
-        </div>
-
-        <a href='/dashboard'>
-        <button>Back Dashboard</button>
-        </a>
-
-        </div>
-        """
-
-    return f"""
+    html = f"""
     {STYLE}
+
+    <div class='navbar'>
+        📊 Admin Dashboard
+    </div>
 
     <div class='container'>
 
-    <h1>➕ Add Student</h1>
+        <div class='stats'>
 
-    <form method='POST'>
+            <div class='stat-card'>
+                <h1>{total_students}</h1>
+                <h3>Total Students</h3>
+            </div>
 
-    <input name='name' placeholder='Student Name' required>
+            <div class='stat-card'>
+                <h1>{total_attendance}</h1>
+                <h3>Total Attendance</h3>
+            </div>
 
-    <input name='email' placeholder='Student Email' required>
+        </div>
 
-    <button type='submit'>Generate QR</button>
+        <div class='menu'>
 
-    </form>
+            <a href='/bulk_upload'>
+                <button>📂 Bulk Upload Students</button>
+            </a>
+
+            <a href='/download'>
+                <button>⬇️ Download Attendance Excel</button>
+            </a>
+
+            <a href='/download_qrs'>
+                <button>🧾 Download QR ZIP</button>
+            </a>
+
+            <a href='/analytics'>
+                <button>📈 Analytics</button>
+            </a>
+
+            <a href='/logout'>
+                <button>🚪 Logout</button>
+            </a>
+
+        </div>
+
+        <div class='card'>
+
+            <h2>Recent Attendance</h2>
+
+            <table>
+
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                </tr>
+    """
+
+    for row in rows:
+
+        name = row[0]
+        full_time = row[1]
+
+        date_part = full_time.split(" ")[0]
+        time_part = full_time.split(" ")[1]
+
+        html += f"""
+            <tr>
+                <td>{name}</td>
+                <td>{date_part}</td>
+                <td>{time_part}</td>
+            </tr>
+        """
+
+    html += """
+            </table>
+
+        </div>
+
+        <div class='footer'>
+            AIMCS Professional Attendance System
+        </div>
 
     </div>
     """
+
+    return html
 
 # ---------------- BULK UPLOAD ----------------
 @app.route("/bulk_upload", methods=["GET", "POST"])
@@ -440,12 +451,12 @@ def bulk_upload():
         if not os.path.exists("static/qrcodes"):
             os.makedirs("static/qrcodes")
 
-        success_count = 0
+        success = 0
 
         for index, row in df.iterrows():
 
-            name = str(row["Name"])
-            email = str(row["Email"])
+            name = str(row["Name"]).strip()
+            email = str(row["Email"]).strip()
 
             token = secrets.token_hex(8)
 
@@ -462,14 +473,14 @@ def bulk_upload():
 
                 safe_name = name.replace(" ", "_")
 
-                file_path = f"static/qrcodes/{safe_name}.png"
+                qr_path = f"static/qrcodes/{safe_name}.png"
 
-                img.save(file_path)
+                img.save(qr_path)
 
-                # send email
-                send_email(email, name, file_path)
+                # EMAIL SEND
+                send_email(email, name, qr_path)
 
-                success_count += 1
+                success += 1
 
             except Exception as e:
                 print("ERROR:", e)
@@ -482,21 +493,13 @@ def bulk_upload():
 
         <div class='container'>
 
-        <h1>✅ Bulk Upload Complete</h1>
+            <h1 class='success'>
+            ✅ {success} QR Codes Generated & Emails Sent
+            </h1>
 
-        <div class='card'>
-
-        <h2>{success_count} Students Added Successfully</h2>
-
-        </div>
-
-        <a href='/download_qrs'>
-        <button>⬇️ Download All QR Codes ZIP</button>
-        </a>
-
-        <a href='/dashboard'>
-        <button>⬅️ Back Dashboard</button>
-        </a>
+            <a href='/dashboard'>
+                <button>⬅️ Back Dashboard</button>
+            </a>
 
         </div>
         """
@@ -504,45 +507,51 @@ def bulk_upload():
     return f"""
     {STYLE}
 
-    <div class='container'>
-
-    <h1>📂 Bulk Upload Students</h1>
-
-    <div class='card'>
-
-    <h3>Excel Format Required:</h3>
-
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-        </tr>
-
-        <tr>
-            <td>John</td>
-            <td>john@gmail.com</td>
-        </tr>
-    </table>
-
+    <div class='navbar'>
+        📂 Bulk Upload
     </div>
 
-    <form method='POST' enctype='multipart/form-data'>
+    <div class='container'>
 
-    <input type='file' name='file' required>
+        <div class='card'>
 
-    <button type='submit'>Upload Excel</button>
+            <h2>Upload Excel File</h2>
 
-    </form>
+            <table>
+
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+
+                <tr>
+                    <td>John</td>
+                    <td>john@gmail.com</td>
+                </tr>
+
+            </table>
+
+            <form method='POST' enctype='multipart/form-data'>
+
+                <input type='file' name='file' required>
+
+                <button type='submit'>
+                    🚀 Generate All QR Codes
+                </button>
+
+            </form>
+
+        </div>
 
     </div>
     """
 
-# ---------------- DOWNLOAD ALL QR ZIP ----------------
+# ---------------- DOWNLOAD QRS ZIP ----------------
 @app.route("/download_qrs")
 @login_required
 def download_qrs():
 
-    zip_name = "all_qr_codes.zip"
+    zip_name = "all_qrs.zip"
 
     with zipfile.ZipFile(zip_name, "w") as zipf:
 
@@ -550,9 +559,9 @@ def download_qrs():
 
             for file in files:
 
-                file_path = os.path.join(root, file)
+                path = os.path.join(root, file)
 
-                zipf.write(file_path)
+                zipf.write(path)
 
     return send_file(zip_name, as_attachment=True)
 
@@ -564,7 +573,7 @@ def mark(token):
     c = conn.cursor()
 
     c.execute(
-        "SELECT name FROM students WHERE token = ?",
+        "SELECT name FROM students WHERE token=?",
         (token,)
     )
 
@@ -578,9 +587,7 @@ def mark(token):
         {STYLE}
 
         <div class='container'>
-
-        <h2 class='error'>❌ Invalid QR Code</h2>
-
+            <h2 class='error'>Invalid QR</h2>
         </div>
         """
 
@@ -592,8 +599,8 @@ def mark(token):
 
     c.execute("""
         SELECT * FROM attendance
-        WHERE name = ?
-        AND date(time) = date('now', '+4 hours')
+        WHERE name=?
+        AND date(time)=date('now','+4 hours')
     """, (name,))
 
     existing = c.fetchone()
@@ -606,16 +613,14 @@ def mark(token):
         {STYLE}
 
         <div class='container'>
-
-        <h2 class='error'>
-        ⚠️ {name} already marked attendance today!
-        </h2>
-
+            <h2 class='error'>
+            ⚠️ Attendance Already Marked Today
+            </h2>
         </div>
         """
 
     c.execute(
-        "INSERT INTO attendance (name, time) VALUES (?, ?)",
+        "INSERT INTO attendance (name,time) VALUES (?,?)",
         (name, time_string)
     )
 
@@ -627,107 +632,20 @@ def mark(token):
 
     <div class='container'>
 
-    <h1 class='success'>✅ Attendance Marked</h1>
+        <h1 class='success'>
+        ✅ Attendance Marked Successfully
+        </h1>
 
-    <div class='card'>
+        <div class='card'>
 
-    <h3>Name: {name}</h3>
+            <h2>{name}</h2>
 
-    <h3>Time: {time_string}</h3>
+            <h3>{time_string}</h3>
 
-    </div>
-
-    </div>
-    """
-
-# ---------------- DASHBOARD ----------------
-@app.route("/dashboard")
-@login_required
-def dashboard():
-
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-
-    c.execute("SELECT COUNT(*) FROM students")
-    total_students = c.fetchone()[0]
-
-    c.execute("SELECT COUNT(*) FROM attendance")
-    total_attendance = c.fetchone()[0]
-
-    c.execute("SELECT name, time FROM attendance ORDER BY id DESC")
-    rows = c.fetchall()
-
-    conn.close()
-
-    html = f"""
-    {STYLE}
-
-    <div class='container'>
-
-    <h1>📊 Admin Dashboard</h1>
-
-    <div class='stats'>
-
-        <div class='stat-card'>
-            <h2>{total_students}</h2>
-            <h3>Total Students</h3>
-        </div>
-
-        <div class='stat-card'>
-            <h2>{total_attendance}</h2>
-            <h3>Total Attendance</h3>
         </div>
 
     </div>
-
-    <div class='menu'>
-
-    <a href='/add_student'><button>➕ Add Student</button></a>
-
-    <a href='/bulk_upload'><button>📂 Bulk Upload</button></a>
-
-    <a href='/download'><button>⬇️ Download Excel</button></a>
-
-    <a href='/download_qrs'><button>🧾 Download All QRs</button></a>
-
-    <a href='/analytics'><button>📈 Analytics</button></a>
-
-    <a href='/logout'><button>🚪 Logout</button></a>
-
-    </div>
-
-    <table>
-
-    <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Time</th>
-    </tr>
     """
-
-    for row in rows:
-
-        name = row[0]
-        full_time = row[1]
-
-        date_part = full_time.split(" ")[0]
-        time_part = full_time.split(" ")[1]
-
-        html += f"""
-        <tr>
-            <td>{name}</td>
-            <td>{date_part}</td>
-            <td>{time_part}</td>
-        </tr>
-        """
-
-    html += """
-    </table>
-
-    </div>
-    """
-
-    return html
 
 # ---------------- DOWNLOAD EXCEL ----------------
 @app.route("/download")
@@ -757,9 +675,6 @@ def analytics():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute("SELECT COUNT(*) FROM attendance")
-    total = c.fetchone()[0]
-
     c.execute("""
         SELECT name, COUNT(*)
         FROM attendance
@@ -773,41 +688,39 @@ def analytics():
     html = f"""
     {STYLE}
 
-    <div class='container'>
-
-    <h1>📈 Attendance Analytics</h1>
-
-    <div class='card'>
-
-    <h2>Total Attendance Entries: {total}</h2>
-
+    <div class='navbar'>
+        📈 Analytics
     </div>
 
-    <table>
+    <div class='container'>
 
-    <tr>
-        <th>Name</th>
-        <th>Total Count</th>
-    </tr>
+        <div class='card'>
+
+            <table>
+
+                <tr>
+                    <th>Name</th>
+                    <th>Total Attendance</th>
+                </tr>
     """
 
     for row in rows:
 
         html += f"""
-        <tr>
-            <td>{row[0]}</td>
-            <td>{row[1]}</td>
-        </tr>
+            <tr>
+                <td>{row[0]}</td>
+                <td>{row[1]}</td>
+            </tr>
         """
 
     html += """
-    </table>
+            </table>
 
-    <br>
+            <a href='/dashboard'>
+                <button>⬅️ Back Dashboard</button>
+            </a>
 
-    <a href='/dashboard'>
-    <button>⬅️ Back Dashboard</button>
-    </a>
+        </div>
 
     </div>
     """
@@ -816,4 +729,9 @@ def analytics():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
