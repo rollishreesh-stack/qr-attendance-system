@@ -19,8 +19,8 @@ DB_NAME = "attendance.db"
 
 # ================= ENV CONFIG =================
 import os
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
+SENDGRID_API_KEY = os.environ.get("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")
+SENDER_EMAIL = os.environ.get("SRolli@seu.edu.ge")
 ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 
 # ================= DATABASE =================
