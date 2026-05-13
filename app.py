@@ -42,4 +42,9 @@ def home():
 
     return render_template_string(HTML)
 
+@app.route("/data")
+def data():
+    with open("attendance.csv", "r") as f:
+        return "<pre>" + f.read() + "</pre>"
+
 app.run(host="0.0.0.0", port=5001)
