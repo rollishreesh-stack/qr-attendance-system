@@ -2,6 +2,6 @@ flask
 flask-login
 pandas
 openpyxl
-gunicorn
 qrcode
 pillow
+matplotlib
