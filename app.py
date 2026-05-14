@@ -80,6 +80,7 @@ body{
     max-width:1100px;
     margin:auto;
     margin-top:40px;
+    margin-bottom:40px;
 }
 
 .card{
@@ -102,6 +103,7 @@ input,textarea{
     border-radius:12px;
     border:1px solid #ccc;
     font-size:16px;
+    box-sizing:border-box;
 }
 
 textarea{
@@ -176,6 +178,20 @@ td{
     font-weight:bold;
 }
 
+.hero{
+    text-align:center;
+    padding:30px;
+}
+
+.hero h1{
+    font-size:42px;
+}
+
+.hero p{
+    font-size:18px;
+    color:#d1d5db;
+}
+
 </style>
 
 <!-- EMAILJS -->
@@ -201,12 +217,12 @@ def home():
 
     <div class='container'>
 
-        <div class='card'>
+        <div class='card hero'>
 
-            <h1>Smart Attendance Management</h1>
+            <h1>Professional QR Attendance Platform</h1>
 
-            <p style='text-align:center;font-size:18px;'>
-            Bulk QR Generation • Email Delivery • Analytics • Excel Export
+            <p>
+            Bulk QR Generation • Attendance Analytics • Email Delivery • Excel Export
             </p>
 
             <a href='/login'>
@@ -234,6 +250,24 @@ def login():
 
             return redirect("/dashboard")
 
+        return f"""
+        {STYLE}
+
+        <div class='container'>
+
+            <div class='card'>
+
+                <h2 class='error'>Invalid Credentials</h2>
+
+                <a href='/login'>
+                <button>Try Again</button>
+                </a>
+
+            </div>
+
+        </div>
+        """
+
     return f"""
     {STYLE}
 
@@ -245,11 +279,20 @@ def login():
 
             <form method='POST'>
 
-                <input name='username' placeholder='Username' required>
+                <input
+                name='username'
+                placeholder='Username'
+                required>
 
-                <input type='password' name='password' placeholder='Password' required>
+                <input
+                type='password'
+                name='password'
+                placeholder='Password'
+                required>
 
-                <button type='submit'>Login</button>
+                <button type='submit'>
+                Login
+                </button>
 
             </form>
 
@@ -272,7 +315,27 @@ def dashboard():
     c.execute("SELECT COUNT(*) FROM attendance")
     total_attendance = c.fetchone()[0]
 
+    c.execute("""
+    SELECT name,time
+    FROM attendance
+    ORDER BY id DESC
+    LIMIT 10
+    """)
+
+    recent = c.fetchall()
+
     conn.close()
+
+    rows = ""
+
+    for row in recent:
+
+        rows += f"""
+        <tr>
+            <td>{row[0]}</td>
+            <td>{row[1]}</td>
+        </tr>
+        """
 
     return f"""
     {STYLE}
@@ -297,13 +360,38 @@ def dashboard():
 
         <div class='card'>
 
-            <a href='/bulk_generate'><button>➕ Bulk QR Generator</button></a>
+            <a href='/bulk_generate'>
+            <button>➕ Bulk QR Generator</button>
+            </a>
 
-            <a href='/download'><button>⬇️ Download Excel</button></a>
+            <a href='/download'>
+            <button>⬇️ Download Excel</button>
+            </a>
 
-            <a href='/download_qrs'><button>📦 Download All QR Codes</button></a>
+            <a href='/download_qrs'>
+            <button>📦 Download All QR Codes</button>
+            </a>
 
-            <a href='/logout'><button>🚪 Logout</button></a>
+            <a href='/logout'>
+            <button>🚪 Logout</button>
+            </a>
+
+        </div>
+
+        <div class='card'>
+
+            <h2>Recent Attendance</h2>
+
+            <table>
+
+                <tr>
+                    <th>Name</th>
+                    <th>Time</th>
+                </tr>
+
+                {rows}
+
+            </table>
 
         </div>
 
@@ -365,7 +453,7 @@ def bulk_generate():
         return f"""
         {STYLE}
 
-        <div class='navbar'>✅ Completed</div>
+        <div class='navbar'>✅ QR Generation Completed</div>
 
         <div class='container'>
 
@@ -374,6 +462,10 @@ def bulk_generate():
                 <h2 class='success'>
                 Successfully Generated {success} QR Codes
                 </h2>
+
+                <p style='text-align:center;'>
+                Emails are being sent automatically using EmailJS.
+                </p>
 
                 <script>
 
@@ -400,7 +492,7 @@ def bulk_generate():
                 </script>
 
                 <a href='/dashboard'>
-                <button>Back Dashboard</button>
+                <button>Back to Dashboard</button>
                 </a>
 
             </div>
@@ -417,16 +509,16 @@ def bulk_generate():
 
         <div class='card'>
 
-            <h2>Paste Students</h2>
+            <h2>Paste Students List</h2>
 
             <p>
-            Format:
+            Enter one student per line in this format:
             </p>
 
             <pre>
-John,john@gmail.com
-Sara,sara@gmail.com
-Mike,mike@gmail.com
+John Doe,john@gmail.com
+Sara Khan,sara@gmail.com
+Mike Ross,mike@gmail.com
             </pre>
 
             <form method='POST'>
@@ -437,7 +529,7 @@ Mike,mike@gmail.com
                 required></textarea>
 
                 <button type='submit'>
-                Generate & Send Emails
+                Generate QR & Send Emails
                 </button>
 
             </form>
@@ -462,7 +554,19 @@ def mark(token):
     student = c.fetchone()
 
     if not student:
-        return "Invalid QR"
+        return f"""
+        {STYLE}
+
+        <div class='container'>
+
+            <div class='card'>
+
+                <h2 class='error'>Invalid QR Code</h2>
+
+            </div>
+
+        </div>
+        """
 
     name = student[0]
 
@@ -479,7 +583,24 @@ def mark(token):
     existing = c.fetchone()
 
     if existing:
-        return f"<h2>{name} already marked today</h2>"
+
+        conn.close()
+
+        return f"""
+        {STYLE}
+
+        <div class='container'>
+
+            <div class='card'>
+
+                <h2 class='error'>
+                ⚠️ {name} already marked attendance today
+                </h2>
+
+            </div>
+
+        </div>
+        """
 
     c.execute("""
     INSERT INTO attendance(name,time)
@@ -497,7 +618,7 @@ def mark(token):
         <div class='card'>
 
             <h1 class='success'>
-            ✅ Attendance Marked
+            ✅ Attendance Marked Successfully
             </h1>
 
             <h2>{name}</h2>
