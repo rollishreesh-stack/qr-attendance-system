@@ -183,6 +183,9 @@ def bulk():
 
     if request.method == "POST":
 
+        import base64
+        from io import BytesIO
+
         data = request.form["data"]
         lines = data.strip().split("\n")
 
@@ -215,12 +218,22 @@ def bulk():
 
                 qr_link = request.host_url + "mark/" + token
 
+                # QR IMAGE
                 img = qrcode.make(qr_link)
 
+                # save file (still keep it)
                 file_path = f"static/qrs/{name.replace(' ','_')}.png"
                 img.save(file_path)
 
-                js_students.append(f"{name},{email},{qr_link}")
+                # ===== CONVERT QR TO BASE64 =====
+                buffer = BytesIO()
+                img.save(buffer, format="PNG")
+                qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+                qr_data_url = f"data:image/png;base64,{qr_base64}"
+
+                # send data to JS
+                js_students.append(f"{name},{email},{qr_link},{qr_data_url}")
 
                 success += 1
 
@@ -250,6 +263,7 @@ def bulk():
                     let name = p[0];
                     let email = p[1];
                     let link = p[2];
+                    let qr = p[3];
 
                     emailjs.send(
                         "service_iuneir8",
@@ -257,7 +271,8 @@ def bulk():
                         {{
                             name: name,
                             email: email,
-                            qr_link: link
+                            qr_link: link,
+                            qr_image: qr
                         }}
                     );
                 }});
