@@ -260,8 +260,8 @@ def bulk():
                     let qr_image = p[3];
 
                     emailjs.send(
-                        "YOUR_SERVICE_ID",
-                        "YOUR_TEMPLATE_ID",
+                        "service_iuneir8",
+                        "template_uyhe7xo",
                         {{
                             name: name,
                             email: email,
