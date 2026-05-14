@@ -1,72 +1,62 @@
 from flask import Flask, request, redirect, send_file, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from sqlalchemy import create_engine, text
-from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
 from datetime import datetime, timedelta
-import pandas as pd
 import secrets
 import qrcode
 import os
 import zipfile
+import pandas as pd
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# ================= APP =================
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
+DB_NAME = "attendance.db"
+
 # ================= DATABASE =================
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-engine = create_engine(DATABASE_URL)
-
-# ================= INIT DB =================
 def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
 
-    with engine.connect() as conn:
+    # students
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        token TEXT UNIQUE
+    )
+    """)
 
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS admins(
-            id SERIAL PRIMARY KEY,
-            username TEXT UNIQUE,
-            password TEXT
+    # attendance
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS attendance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        time TEXT
+    )
+    """)
+
+    # admins (NEW)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS admins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    # default admin
+    c.execute("SELECT * FROM admins WHERE username='admin'")
+    if not c.fetchone():
+        c.execute(
+            "INSERT INTO admins(username,password) VALUES (?,?)",
+            ("admin", generate_password_hash("admin123"))
         )
-        """))
 
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS students(
-            id SERIAL PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            token TEXT UNIQUE
-        )
-        """))
-
-        conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS attendance(
-            id SERIAL PRIMARY KEY,
-            name TEXT,
-            time TEXT
-        )
-        """))
-
-        # default admin
-        admin = conn.execute(
-            text("SELECT * FROM admins WHERE username='admin'")
-        ).fetchone()
-
-        if not admin:
-
-            conn.execute(
-                text("""
-                INSERT INTO admins(username,password)
-                VALUES (:u,:p)
-                """),
-                {
-                    "u":"admin",
-                    "p":generate_password_hash("admin123")
-                }
-            )
-
-        conn.commit()
+    conn.commit()
+    conn.close()
 
 init_db()
 
@@ -75,175 +65,90 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 class User(UserMixin):
-    def __init__(self,id):
+    def __init__(self, id):
         self.id = id
 
 @login_manager.user_loader
 def load_user(user_id):
     return User(user_id)
 
-# ================= STYLE =================
+# ================= STYLE (UPGRADED UI) =================
 STYLE = """
 <style>
-
 body{
     margin:0;
     font-family:Arial;
-    background:#0f172a;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
     color:white;
-    overflow-x:hidden;
 }
 
-/* SIDEBAR */
-.sidebar{
-    position:fixed;
-    left:0;
-    top:0;
-    width:240px;
-    height:100%;
+.header{
     background:#111827;
-    padding-top:20px;
-    box-shadow:4px 0 15px rgba(0,0,0,0.4);
-}
-
-.sidebar h2{
+    padding:18px;
     text-align:center;
-    color:#60a5fa;
-}
-
-.sidebar a{
-    display:block;
-    color:white;
-    text-decoration:none;
-    padding:15px 25px;
-    transition:0.3s;
-}
-
-.sidebar a:hover{
-    background:#2563eb;
-    transform:translateX(5px);
-}
-
-/* MAIN */
-.main{
-    margin-left:260px;
-    padding:30px;
-}
-
-/* HEADER */
-.title{
-    font-size:34px;
+    font-size:24px;
     font-weight:bold;
-    margin-bottom:20px;
+    animation:fadeIn 0.5s ease;
 }
 
-/* CARDS */
+.container{
+    width:90%;
+    max-width:1000px;
+    margin:auto;
+    margin-top:30px;
+}
+
 .card{
     background:white;
     color:black;
     padding:25px;
-    border-radius:18px;
+    border-radius:15px;
     margin-top:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.3);
-    animation:fadeIn 0.7s ease;
-}
-
-@keyframes fadeIn{
-    from{
-        opacity:0;
-        transform:translateY(20px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
-}
-
-/* BUTTONS */
-button{
-    width:100%;
-    padding:13px;
-    border:none;
-    border-radius:10px;
-    background:#2563eb;
-    color:white;
-    cursor:pointer;
-    transition:0.3s;
-    margin-top:10px;
-}
-
-button:hover{
-    background:#1d4ed8;
-    transform:scale(1.02);
-}
-
-/* INPUTS */
-textarea,input{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #ccc;
-    margin-top:10px;
-}
-
-/* STATS */
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
-}
-
-.box{
-    background:linear-gradient(135deg,#2563eb,#1d4ed8);
-    padding:25px;
-    border-radius:18px;
-    text-align:center;
-    box-shadow:0 5px 20px rgba(0,0,0,0.3);
+    box-shadow:0 5px 15px rgba(0,0,0,0.3);
     animation:fadeIn 0.5s ease;
 }
 
-/* TABLE */
-table{
+button{
     width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-
-th{
+    padding:12px;
+    margin-top:10px;
     background:#2563eb;
     color:white;
-    padding:12px;
+    border:none;
+    border-radius:10px;
 }
 
-td{
-    background:white;
-    color:black;
-    padding:12px;
-    border-bottom:1px solid #ddd;
+textarea,input{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
 }
 
-canvas{
-    background:white;
-    border-radius:15px;
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+}
+
+.box{
+    background:#2563eb;
     padding:20px;
+    text-align:center;
+    border-radius:12px;
 }
 
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:translateY(0);}
+}
 </style>
 
-<!-- EMAILJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<script>
-(function(){
-    emailjs.init("-oGl3hn1HEMpvxh2T");
-})();
-</script>
-
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- QR SCANNER -->
-<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+emailjs.init("-oGl3hn1HEMpvxh2T");
+</script>
 """
 
 # ================= LOGIN PAGE =================
@@ -251,301 +156,190 @@ canvas{
 def login():
 
     if request.method == "POST":
+        u = request.form["username"]
+        p = request.form["password"]
 
-        username = request.form["username"]
-        password = request.form["password"]
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
 
-        with engine.connect() as conn:
+        c.execute("SELECT * FROM admins WHERE username=?", (u,))
+        admin = c.fetchone()
+        conn.close()
 
-            admin = conn.execute(
-                text("SELECT * FROM admins WHERE username=:u"),
-                {"u":username}
-            ).fetchone()
+        if admin and check_password_hash(admin[2], p):
+            session["admin"] = True
+            return redirect("/dashboard")
 
-            if admin and check_password_hash(admin[2],password):
-
-                user = User(admin[0])
-                login_user(user)
-
-                return redirect("/dashboard")
-
-        return "<h2>Invalid Login</h2>"
+        return "Invalid login"
 
     return f"""
     {STYLE}
+    <div class='header'>LOGIN</div>
 
-    <div style='display:flex;justify-content:center;align-items:center;height:100vh;'>
-
-        <div class='card' style='width:400px;'>
-
-            <h1 style='text-align:center;'>🎓 AIMCS Login</h1>
-
+    <div class='container'>
+        <div class='card'>
             <form method='POST'>
-
                 <input name='username' placeholder='Username'>
-
                 <input type='password' name='password' placeholder='Password'>
-
                 <button>Login</button>
-
             </form>
-
         </div>
-
     </div>
     """
 
 # ================= DASHBOARD =================
 @app.route("/dashboard")
-@login_required
 def dashboard():
 
-    with engine.connect() as conn:
+    if not session.get("admin"):
+        return redirect("/")
 
-        students = conn.execute(
-            text("SELECT COUNT(*) FROM students")
-        ).scalar()
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
 
-        attendance = conn.execute(
-            text("SELECT COUNT(*) FROM attendance")
-        ).scalar()
+    c.execute("SELECT COUNT(*) FROM students")
+    students = c.fetchone()[0]
 
-        rows = conn.execute(
-            text("""
-            SELECT name, COUNT(*) 
-            FROM attendance
-            GROUP BY name
-            """)
-        ).fetchall()
+    c.execute("SELECT COUNT(*) FROM attendance")
+    attendance = c.fetchone()[0]
 
-    labels = [r[0] for r in rows]
-    values = [r[1] for r in rows]
+    conn.close()
 
     return f"""
     {STYLE}
+    <div class='header'>📊 DASHBOARD</div>
 
-    <div class='sidebar'>
-
-        <h2>🎓 AIMCS</h2>
-
-        <a href='/dashboard'>📊 Dashboard</a>
-        <a href='/bulk'>➕ Bulk QR</a>
-        <a href='/scanner'>📷 QR Scanner</a>
-        <a href='/download'>⬇ Excel</a>
-        <a href='/download_qrs'>📦 QR ZIP</a>
-        <a href='/logout'>🚪 Logout</a>
-
-    </div>
-
-    <div class='main'>
-
-        <div class='title'>
-            QR Attendance Dashboard
-        </div>
+    <div class='container'>
 
         <div class='stats'>
-
-            <div class='box'>
-                <h2>{students}</h2>
-                <p>Total Students</p>
-            </div>
-
-            <div class='box'>
-                <h2>{attendance}</h2>
-                <p>Total Attendance</p>
-            </div>
-
+            <div class='box'>Students<br><h2>{students}</h2></div>
+            <div class='box'>Attendance<br><h2>{attendance}</h2></div>
         </div>
 
         <div class='card'>
+            <canvas id="chart"></canvas>
+        </div>
 
-            <h2>Attendance Analytics</h2>
-
-            <canvas id='chart'></canvas>
-
+        <div class='card'>
+            <a href='/bulk'><button>➕ Bulk QR</button></a>
+            <a href='/scanner'><button>📷 Scanner</button></a>
+            <a href='/download'><button>⬇ Excel</button></a>
+            <a href='/download_qrs'><button>📦 QR ZIP</button></a>
+            <a href='/logout'><button>🚪 Logout</button></a>
         </div>
 
     </div>
 
     <script>
-
-    const ctx = document.getElementById('chart');
-
-    new Chart(ctx, {{
-        type:'bar',
+    new Chart(document.getElementById("chart"), {{
+        type:"bar",
         data:{{
-            labels:{labels},
-            datasets:[{{
-                label:'Attendance Count',
-                data:{values}
-            }}]
+            labels:["Students","Attendance"],
+            datasets:[{{data:[{students},{attendance}]} }]
         }}
     }});
-
     </script>
     """
 
-# ================= BULK =================
+# ================= BULK QR =================
 @app.route("/bulk", methods=["GET","POST"])
-@login_required
 def bulk():
 
     if request.method == "POST":
 
         data = request.form["data"]
-        lines = data.strip().split("\\n")
-
-        success = 0
-        js_students = []
+        lines = data.strip().split("\n")
 
         os.makedirs("static/qrs", exist_ok=True)
 
-        with engine.connect() as conn:
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
 
-            for line in lines:
+        js = []
 
-                try:
+        for line in lines:
 
-                    line = line.strip()
+            if "," not in line:
+                continue
 
-                    if not line or "," not in line:
-                        continue
+            name,email = line.split(",",1)
+            token = secrets.token_hex(8)
 
-                    name, email = line.split(",",1)
+            c.execute("INSERT INTO students(name,email,token) VALUES (?,?,?)",
+                      (name,email,token))
 
-                    token = secrets.token_hex(8)
+            link = request.host_url + "mark/" + token
+            img = "https://api.qrserver.com/v1/create-qr-code/?data=" + link
 
-                    conn.execute(
-                        text("""
-                        INSERT INTO students(name,email,token)
-                        VALUES (:n,:e,:t)
-                        """),
-                        {
-                            "n":name,
-                            "e":email,
-                            "t":token
-                        }
-                    )
+            qrcode.make(link).save(f"static/qrs/{name}.png")
 
-                    qr_link = request.host_url + "mark/" + token
+            js.append(f"{name},{email},{link},{img}")
 
-                    qr_image = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + qr_link
+        conn.commit()
+        conn.close()
 
-                    img = qrcode.make(qr_link)
-
-                    img.save(f"static/qrs/{name}.png")
-
-                    js_students.append(
-                        f"{name},{email},{qr_link},{qr_image}"
-                    )
-
-                    success += 1
-
-                except Exception as e:
-                    print(e)
-
-            conn.commit()
-
-        js_data = "\\n".join(js_students)
+        js_data = "\n".join(js)
 
         return f"""
         {STYLE}
+        <div class='header'>DONE</div>
 
-        <div class='main'>
-
+        <div class='container'>
             <div class='card'>
-
-                <h1>{success} QR Generated</h1>
+                <h2>QR Generated</h2>
 
                 <script>
+                const users = `{js_data}`.split("\\n");
 
-                const students = `{js_data}`.split('\\n');
+                users.forEach(u=>{{
+                    let p=u.split(",");
 
-                students.forEach(s => {{
-
-                    let p = s.split(",");
-
-                    emailjs.send(
-                        "service_iuneir8",
-                        "template_uyhe7xo",
-                        {{
-                            name:p[0],
-                            email:p[1],
-                            qr_link:p[2],
-                            qr_image:p[3]
-                        }}
-                    );
-
+                    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{{
+                        name:p[0],
+                        email:p[1],
+                        qr_link:p[2],
+                        qr_image:p[3]
+                    }});
                 }});
-
                 </script>
-
-                <a href='/dashboard'>
-                    <button>Back Dashboard</button>
-                </a>
-
             </div>
-
         </div>
         """
 
     return f"""
     {STYLE}
+    <div class='header'>BULK QR</div>
 
-    <div class='main'>
-
+    <div class='container'>
         <div class='card'>
-
-            <h2>Bulk QR Generator</h2>
-
-            <p>Format: Name,Email</p>
-
-            <form method='POST'>
-
-                <textarea name='data'></textarea>
-
-                <button>Generate QR</button>
-
-            </form>
-
+            <textarea name='data'></textarea>
+            <button>Generate</button>
         </div>
-
     </div>
     """
 
-# ================= QR SCANNER =================
+# ================= SCANNER =================
 @app.route("/scanner")
-@login_required
 def scanner():
 
     return f"""
     {STYLE}
+    <div class='header'>SCANNER</div>
 
-    <div class='main'>
-
+    <div class='container'>
         <div class='card'>
-
-            <h2>📷 Mobile QR Scanner</h2>
-
+            <script src="https://unpkg.com/html5-qrcode"></script>
             <div id="reader"></div>
-
         </div>
-
     </div>
 
     <script>
-
-    function onScanSuccess(decodedText) {{
-        window.location.href = decodedText;
+    function onScanSuccess(text){{
+        window.location.href=text;
     }}
 
-    let scanner = new Html5QrcodeScanner(
-        "reader",
-        {{ fps: 10, qrbox: 250 }}
-    );
-
-    scanner.render(onScanSuccess);
-
+    new Html5QrcodeScanner("reader",{{fps:10,qrbox:250}})
+        .render(onScanSuccess);
     </script>
     """
 
@@ -553,88 +347,44 @@ def scanner():
 @app.route("/mark/<token>")
 def mark(token):
 
-    with engine.connect() as conn:
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
 
-        result = conn.execute(
-            text("""
-            SELECT name FROM students
-            WHERE token=:t
-            """),
-            {"t":token}
-        ).fetchone()
+    c.execute("SELECT name FROM students WHERE token=?", (token,))
+    data = c.fetchone()
 
-        if not result:
-            return "Invalid QR"
+    if not data:
+        return "Invalid"
 
-        name = result[0]
+    name = data[0]
+    now = datetime.utcnow() + timedelta(hours=4)
 
-        now = datetime.utcnow() + timedelta(hours=4)
+    c.execute("SELECT * FROM attendance WHERE name=?",(name,))
+    if c.fetchone():
+        return "Already marked"
 
-        time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)",
+              (name,str(now)))
 
-        existing = conn.execute(
-            text("""
-            SELECT * FROM attendance
-            WHERE name=:n
-            """),
-            {"n":name}
-        ).fetchone()
+    conn.commit()
+    conn.close()
 
-        if existing:
-            return f"{name} already marked"
-
-        conn.execute(
-            text("""
-            INSERT INTO attendance(name,time)
-            VALUES (:n,:t)
-            """),
-            {
-                "n":name,
-                "t":time_str
-            }
-        )
-
-        conn.commit()
-
-    return f"""
-    {STYLE}
-
-    <div class='main'>
-
-        <div class='card'>
-
-            <h1>✅ Attendance Marked</h1>
-
-            <h2>{name}</h2>
-
-            <h3>{time_str}</h3>
-
-        </div>
-
-    </div>
-    """
+    return f"<h2>Marked {name}</h2>"
 
 # ================= DOWNLOAD =================
 @app.route("/download")
-@login_required
 def download():
 
-    with engine.connect() as conn:
-
-        df = pd.read_sql(
-            text("SELECT * FROM attendance"),
-            conn
-        )
+    conn = sqlite3.connect(DB_NAME)
+    df = pd.read_sql_query("SELECT * FROM attendance", conn)
 
     file = "attendance.xlsx"
-
     df.to_excel(file,index=False)
 
     return send_file(file,as_attachment=True)
 
 # ================= ZIP =================
 @app.route("/download_qrs")
-@login_required
 def zip_qr():
 
     z = zipfile.ZipFile("qrs.zip","w")
@@ -648,11 +398,8 @@ def zip_qr():
 
 # ================= LOGOUT =================
 @app.route("/logout")
-@login_required
 def logout():
-
-    logout_user()
-
+    session.clear()
     return redirect("/")
 
 # ================= RUN =================
