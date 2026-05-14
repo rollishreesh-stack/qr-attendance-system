@@ -294,7 +294,7 @@ def bulk():
                 users.forEach(u=>{{
                     let p=u.split(",");
 
-                    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{{
+                    emailjs.send("service_iuneir8","template_uyhe7xo",{{
                         name:p[0],
                         email:p[1],
                         qr_link:p[2],
