@@ -183,9 +183,6 @@ def bulk():
 
     if request.method == "POST":
 
-        import base64
-        from io import BytesIO
-
         data = request.form["data"]
         lines = data.strip().split("\n")
 
@@ -202,7 +199,7 @@ def bulk():
             try:
                 line = line.strip()
 
-                if "," not in line:
+                if not line or "," not in line:
                     continue
 
                 name, email = line.split(",", 1)
@@ -211,29 +208,25 @@ def bulk():
 
                 token = secrets.token_hex(8)
 
+                # save in DB
                 c.execute("""
                 INSERT INTO students(name,email,token)
                 VALUES (?,?,?)
                 """, (name,email,token))
 
+                # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
 
-                # QR IMAGE
-                img = qrcode.make(qr_link)
+                # ✅ ONLINE QR IMAGE (IMPORTANT FIX)
+                qr_image_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + qr_link
 
-                # save file (still keep it)
+                # optional local save (for download zip later)
+                img = qrcode.make(qr_link)
                 file_path = f"static/qrs/{name.replace(' ','_')}.png"
                 img.save(file_path)
 
-                # ===== CONVERT QR TO BASE64 =====
-                buffer = BytesIO()
-                img.save(buffer, format="PNG")
-                qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-
-                qr_data_url = f"data:image/png;base64,{qr_base64}"
-
-                # send data to JS
-                js_students.append(f"{name},{email},{qr_link},{qr_data_url}")
+                # send to emailjs
+                js_students.append(f"{name},{email},{qr_link},{qr_image_url}")
 
                 success += 1
 
@@ -243,16 +236,17 @@ def bulk():
         conn.commit()
         conn.close()
 
-        js_data = "\\n".join(js_students)
+        js_data = "\n".join(js_students)
 
         return f"""
         {STYLE}
-        <div class='header'>✅ Completed</div>
+
+        <div class='header'>✅ QR Generation Completed</div>
 
         <div class='container'>
             <div class='card'>
-                <h2 style='color:green;text-align:center'>
-                {success} QR Codes Generated
+                <h2 style='text-align:center;color:green;'>
+                    {success} QR Codes Generated
                 </h2>
 
                 <script>
@@ -263,28 +257,32 @@ def bulk():
                     let name = p[0];
                     let email = p[1];
                     let link = p[2];
-                    let qr = p[3];
+                    let qr_image = p[3];
 
                     emailjs.send(
-                        "service_iuneir8",
-                        "template_uyhe7xo",
+                        "YOUR_SERVICE_ID",
+                        "YOUR_TEMPLATE_ID",
                         {{
                             name: name,
                             email: email,
                             qr_link: link,
-                            qr_image: qr
+                            qr_image: qr_image
                         }}
                     );
                 }});
                 </script>
 
-                <a href='/dashboard'><button>Back</button></a>
+                <a href='/dashboard'>
+                    <button>Back to Dashboard</button>
+                </a>
+
             </div>
         </div>
         """
 
     return f"""
     {STYLE}
+
     <div class='header'>Bulk QR Generator</div>
 
     <div class='container'>
@@ -294,7 +292,7 @@ def bulk():
 
             <form method='POST'>
                 <textarea name='data'></textarea>
-                <button>Generate</button>
+                <button>Generate QR</button>
             </form>
         </div>
     </div>
