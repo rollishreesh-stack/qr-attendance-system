@@ -18,14 +18,16 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        email TEXT,
-        token TEXT UNIQUE
-    )
-    """)
+c.execute("""
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    email TEXT,
+    token TEXT UNIQUE,
+    start_time TEXT,
+    end_time TEXT
+)
+""")
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS attendance (
@@ -182,6 +184,8 @@ def dashboard():
 def bulk():
 
     if request.method == "POST":
+        start_time = request.form["start_time"]
+end_time = request.form["end_time"]
 
         data = request.form["data"]
         lines = data.strip().split("\n")
@@ -209,10 +213,17 @@ def bulk():
                 token = secrets.token_hex(8)
 
                 # save in DB
-                c.execute("""
-                INSERT INTO students(name,email,token)
-                VALUES (?,?,?)
-                """, (name,email,token))
+               c.execute("""
+INSERT INTO students
+(name,email,token,start_time,end_time)
+VALUES (?,?,?,?,?)
+""", (
+    name,
+    email,
+    token,
+    start_time,
+    end_time
+))
 
                 # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
@@ -305,31 +316,94 @@ def mark(token):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    c.execute("SELECT name FROM students WHERE token=?", (token,))
+    c.execute("""
+    SELECT name,start_time,end_time
+    FROM students
+    WHERE token=?
+    """, (token,))
+
     data = c.fetchone()
 
     if not data:
+        conn.close()
         return "Invalid QR"
 
     name = data[0]
+    start_time = data[1]
+    end_time = data[2]
 
     now = datetime.utcnow() + timedelta(hours=4)
+
+    start_dt = datetime.strptime(
+        start_time,
+        "%Y-%m-%dT%H:%M"
+    )
+
+    end_dt = datetime.strptime(
+        end_time,
+        "%Y-%m-%dT%H:%M"
+    )
+
+    if now < start_dt:
+
+        conn.close()
+
+        return f"""
+        <h2 style='color:red;text-align:center'>
+        Attendance has not started yet
+        <br><br>
+        Start Time:
+        {start_dt}
+        </h2>
+        """
+
+    if now > end_dt:
+
+        conn.close()
+
+        return f"""
+        <h2 style='color:red;text-align:center'>
+        Attendance Closed
+        <br><br>
+        End Time:
+        {end_dt}
+        </h2>
+        """
+
+    c.execute("""
+    SELECT *
+    FROM attendance
+    WHERE name=?
+    AND date(time)=date('now','+4 hours')
+    """, (name,))
+
+    if c.fetchone():
+
+        conn.close()
+
+        return f"""
+        <h2>
+        {name} already marked
+        </h2>
+        """
+
     time_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
     c.execute("""
-    SELECT * FROM attendance
-    WHERE name=? AND date(time)=date('now','+4 hours')
-    """,(name,))
-
-    if c.fetchone():
-        return f"{name} already marked"
-
-    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)",(name,time_str))
+    INSERT INTO attendance(name,time)
+    VALUES (?,?)
+    """, (name,time_str))
 
     conn.commit()
     conn.close()
 
-    return f"<h2>Attendance marked for {name}</h2>"
+    return f"""
+    <h1 style='text-align:center;color:green'>
+    Attendance Marked Successfully
+    <br><br>
+    {name}
+    </h1>
+    """
 
 # ================= DOWNLOAD =================
 @app.route("/download")
