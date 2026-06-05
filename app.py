@@ -109,32 +109,48 @@ LAYOUT_TEMPLATE = """
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Fast, Elegant Typography Motion Picture Keyframes */
-        @keyframes driftLeft {
+        /* Seamless Infinite Kinetic Typography Keyframes */
+        @keyframes marqueeLeft {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-50%, 0, 0); }
         }
-        @keyframes driftRight {
+        @keyframes marqueeRight {
             0% { transform: translate3d(-50%, 0, 0); }
             100% { transform: translate3d(0, 0, 0); }
         }
         @keyframes subtlePulse {
-            0%, 100% { opacity: 0.12; transform: scale(0.95) translate(-5%, -5%); }
-            50% { opacity: 0.32; transform: scale(1.05) translate(0%, 0%); }
+            0%, 100% { opacity: 0.02; transform: scale(0.98); }
+            50% { opacity: 0.08; transform: scale(1.02); }
         }
 
-        .motion-track-fast-left {
-            display: flex;
-            width: 200%;
-            animation: driftLeft 5s linear infinite;
+        .motion-canvas-left {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marqueeLeft 28s linear infinite;
         }
-        .motion-track-fast-right {
-            display: flex;
-            width: 200%;
-            animation: driftRight 4s linear infinite;
+        .motion-canvas-right {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marqueeRight 32s linear infinite;
         }
-        .motion-center-glowing {
-            animation: subtlePulse 3.5s ease-in-out infinite;
+        .motion-center-glow {
+            animation: subtlePulse 4s ease-in-out infinite;
+        }
+        
+        /* Smooth Scrollbars for premium finish */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
         }
     </style>
 </head>
@@ -190,7 +206,7 @@ LAYOUT_TEMPLATE = """
 
     <!-- Core Content Container -->
     <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative overflow-hidden">
-        <header class="h-20 bg-[#030712]/40 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
+        <header class="h-20 bg-[#030712]/40 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 id="mainHeader" class="sticky top-0 z-30">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase font-outfit">AIMCS System Online</p>
@@ -217,7 +233,7 @@ LAYOUT_TEMPLATE = """
 </html>
 """
 
-# ================= LOGIN ROUTE (UPGRADED WITH PREMIUM CANVAS) =================
+# ================= LOGIN ROUTE (FULL SCREEN KINETIC CANVAS) =================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -242,23 +258,51 @@ def login():
             error_msg = "Invalid username or password."
 
     content = f"""
-    <!-- Elegant Full-Screen Kinetic Typography Background Canvas -->
-    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-20 flex flex-col justify-between py-12 z-0">
-        <div class="motion-track-fast-left whitespace-nowrap text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.06);">
-            AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+    <!-- Full Screen Fixed Kinetic Wallpapers -->
+    <div class="fixed inset-0 pointer-events-none select-none overflow-hidden w-screen h-screen z-0 bg-[#030712] flex flex-col justify-between py-10">
+        
+        <!-- Track Row 1 -->
+        <div class="w-full overflow-hidden whitespace-nowrap opacity-[0.04]">
+            <div class="motion-canvas-left text-[9rem] font-black font-outfit uppercase tracking-[2rem] text-white">
+                AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+            </div>
         </div>
         
-        <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[12rem] text-transparent bg-clip-text bg-gradient-to-b from-white/5 via-white/[0.01] to-transparent tracking-widest uppercase motion-center-glowing">
-            AIMCS
+        <!-- Track Row 2 -->
+        <div class="w-full overflow-hidden whitespace-nowrap opacity-[0.06]">
+            <div class="motion-canvas-right text-[11rem] font-bold font-outfit uppercase tracking-[3rem] text-transparent" style="-webkit-text-stroke: 2px white;">
+                AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+            </div>
         </div>
 
-        <div class="motion-track-fast-right whitespace-nowrap text-[4.5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.04);">
-            AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+        <!-- Track Row 3 -->
+        <div class="w-full overflow-hidden whitespace-nowrap opacity-[0.03]">
+            <div class="motion-canvas-left text-[8rem] font-black font-outfit uppercase tracking-[1.5rem] text-transparent" style="-webkit-text-stroke: 1.5px white;">
+                AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+            </div>
         </div>
+
+        <!-- Track Row 4 -->
+        <div class="w-full overflow-hidden whitespace-nowrap opacity-[0.05]">
+            <div class="motion-canvas-right text-[10rem] font-black font-outfit uppercase tracking-[2.5rem] text-white">
+                AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+            </div>
+        </div>
+
+        <!-- Huge Layered Static Focal Backdrop Lettering -->
+        <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div class="font-outfit font-black text-[22rem] md:text-[28rem] text-transparent bg-clip-text bg-gradient-to-b from-white/10 via-white/[0.01] to-transparent tracking-widest uppercase motion-center-glow">
+                AIMCS
+            </div>
+        </div>
+
+        <!-- Ambient Blending Overlays -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-[#030712] z-11"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#030712] via-transparent to-[#030712] z-11"></div>
     </div>
 
     <!-- Floating Frosted Login Card -->
-    <div class="relative z-10 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl">
+    <div class="relative z-20 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-8 space-y-6 shadow-2xl transition-all">
         <div class="text-center space-y-2">
             <div class="inline-flex p-3.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl mb-1">
                 <i class="fa-solid fa-lock text-2xl"></i>
@@ -357,19 +401,23 @@ def home():
             
             <!-- AIMCS Letters Motion Background Canvas -->
             <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-30 flex flex-col justify-between py-6">
-                <!-- Track 1: Outlined Letters Scrolling Left Fast -->
-                <div class="motion-track-fast-left whitespace-nowrap text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.06);">
-                    AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+                <!-- Track 1 -->
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="motion-canvas-left text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.06);">
+                        AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+                    </div>
                 </div>
                 
-                <!-- Center: Giant Elegant Platinum Shifting Glow Letter Array -->
-                <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[14rem] text-transparent bg-clip-text bg-gradient-to-b from-white/10 via-white/[0.02] to-transparent tracking-widest uppercase motion-center-glowing z-0">
+                <!-- Center Static Array -->
+                <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[14rem] text-transparent bg-clip-text bg-gradient-to-b from-white/10 via-white/[0.02] to-transparent tracking-widest uppercase motion-center-glow z-0">
                     AIMCS
                 </div>
 
-                <!-- Track 2: Outlined Letters Scrolling Right Fast -->
-                <div class="motion-track-fast-right whitespace-nowrap text-[4.5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.04);">
-                    AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+                <!-- Track 2 -->
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="motion-canvas-right text-[5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.04);">
+                        AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+                    </div>
                 </div>
             </div>
 
@@ -379,7 +427,6 @@ def home():
             <!-- Dashboard Content Layout Panel -->
             <div class="relative z-20 max-w-xl space-y-5">
                 <div class="space-y-1">
-                    <!-- Brand Title with Silver / Platinum Gradient Fill -->
                     <h2 class="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-slate-50 via-slate-300 to-slate-500 tracking-wider font-outfit drop-shadow-md">
                         AIMCS
                     </h2>
