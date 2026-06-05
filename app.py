@@ -14,7 +14,7 @@ import io
 CHARTS_ENABLED = True
 try:
     import matplotlib
-    matplotlib.use('Agg')  
+matplotlib.use('Agg')  # Forces background rendering (fixes headless server crashes) 
     import matplotlib.pyplot as plt
 except Exception as e:
     print("SYSTEM NOTICE: Server environment lacks graphical drivers. Disabling analytics chart layer safely.")
