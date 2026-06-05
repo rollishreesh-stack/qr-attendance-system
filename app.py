@@ -81,7 +81,7 @@ def load_user(user_id):
         return User(data[0], data[1])
     return None
 
-# ================= PREMIUM MASTER LAYOUT WITH MOVING KINETIC WALLPAPER =================
+# ================= PREMIUM MASTER LAYOUT WITH GOLD KINETIC WALLPAPER =================
 LAYOUT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -128,6 +128,13 @@ LAYOUT_TEMPLATE = """
             width: max-content;
             animation: streamRight 38s linear infinite;
         }
+        .motion-center-glow {
+            animation: subtlePulse 4s ease-in-out infinite;
+        }
+        @keyframes subtlePulse {
+            0%, 100% { opacity: 0.1; transform: scale(0.98); }
+            50% { opacity: 0.3; transform: scale(1.02); }
+        }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
@@ -146,34 +153,35 @@ LAYOUT_TEMPLATE = """
 <body class="text-slate-300 min-h-screen flex overflow-x-hidden relative">
 
     <!-- GLOBAL IMMERSIVE "MOTION PICTURE" BACKGROUND CANVAS -->
-    <div class="fixed inset-0 w-screen h-screen pointer-events-none select-none overflow-hidden z-0 flex flex-col justify-between py-8 opacity-[0.035]">
+    <!-- Opacity significantly increased, colors shifted to Premium Gold/Amber -->
+    <div class="fixed inset-0 w-screen h-screen pointer-events-none select-none overflow-hidden z-0 flex flex-col justify-between py-8 opacity-40">
         
-        <!-- Moving Track 1 -->
-        <div class="w-full overflow-hidden whitespace-nowrap text-[8.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-white">
+        <!-- Moving Track 1 (Solid Gold) -->
+        <div class="w-full overflow-hidden whitespace-nowrap text-[8.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/30">
             <div class="kinetic-track-left">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
         
-        <!-- Moving Track 2 (Outline Aesthetic) -->
-        <div class="w-full overflow-hidden whitespace-nowrap text-[11rem] font-bold font-outfit uppercase tracking-[2.5rem] text-transparent" style="-webkit-text-stroke: 2px white;">
+        <!-- Moving Track 2 (Outline Aesthetic - Bright Amber) -->
+        <div class="w-full overflow-hidden whitespace-nowrap text-[11rem] font-bold font-outfit uppercase tracking-[2.5rem] text-transparent" style="-webkit-text-stroke: 2px rgba(245, 158, 11, 0.4);">
             <div class="kinetic-track-right">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
 
-        <!-- Moving Track 3 -->
-        <div class="w-full overflow-hidden whitespace-nowrap text-[7rem] font-black font-outfit uppercase tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px white;">
+        <!-- Moving Track 3 (Outline Aesthetic - Subtle Yellow) -->
+        <div class="w-full overflow-hidden whitespace-nowrap text-[7rem] font-black font-outfit uppercase tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(251, 191, 36, 0.3);">
             <div class="kinetic-track-left">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
 
-        <!-- Moving Track 4 -->
-        <div class="w-full overflow-hidden whitespace-nowrap text-[9.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-white">
+        <!-- Moving Track 4 (Solid Gold) -->
+        <div class="w-full overflow-hidden whitespace-nowrap text-[9.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/20">
             <div class="kinetic-track-right">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
@@ -183,7 +191,7 @@ LAYOUT_TEMPLATE = """
 
     {% if current_user.is_authenticated %}
     <!-- Translucent Frosted Sidebar Menu Navigation -->
-    <aside class="w-72 bg-[#0b0f19]/75 backdrop-blur-md border-r border-slate-800 flex flex-col fixed h-full z-20">
+    <aside class="w-72 bg-[#0b0f19]/80 backdrop-blur-md border-r border-slate-800 flex flex-col fixed h-full z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="bg-slate-800 p-2.5 rounded-xl text-white shadow-md border border-slate-700">
                 <i class="fa-solid fa-graduation-cap text-xl"></i>
@@ -216,13 +224,13 @@ LAYOUT_TEMPLATE = """
         </nav>
 
         <div class="p-4 border-t border-slate-800">
-            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 flex items-center gap-3">
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm border border-slate-700">
                     {{ current_user.username[0].upper() }}
                 </div>
                 <div class="truncate">
                     <p class="text-xs font-semibold text-white truncate font-outfit">{{ current_user.username }}</p>
-                    <p class="text-[10px] text-emerald-400 truncate font-mono">Active Session</p>
+                    <p class="text-[10px] text-amber-400 truncate font-mono">Active Session</p>
                 </div>
             </div>
         </div>
@@ -231,13 +239,13 @@ LAYOUT_TEMPLATE = """
 
     <!-- Core Content App Layout -->
     <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative z-10">
-        <header id="mainHeader" class="h-20 bg-[#030712]/40 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30">
+        <header id="mainHeader" class="h-20 bg-[#030712]/60 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase font-outfit">AIMCS System Online</p>
             </div>
-            <div class="text-xs font-medium text-slate-300 bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-800">
-                <i class="fa-regular fa-clock mr-2 text-slate-400"></i> <span id="liveClock" class="font-mono"></span>
+            <div class="text-xs font-medium text-slate-300 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
+                <i class="fa-regular fa-clock mr-2 text-amber-500"></i> <span id="liveClock" class="font-mono"></span>
             </div>
         </header>
 
@@ -283,9 +291,9 @@ def login():
             error_msg = "Invalid username or password."
 
     content = f"""
-    <div class="relative z-20 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-8 space-y-6 shadow-2xl">
+    <div class="relative z-20 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-8 space-y-6 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)]">
         <div class="text-center space-y-2">
-            <div class="inline-flex p-3.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl mb-1">
+            <div class="inline-flex p-3.5 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl mb-1 shadow-inner">
                 <i class="fa-solid fa-lock text-2xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">Admin Sign In</h2>
@@ -297,13 +305,13 @@ def login():
         <form method="POST" class="space-y-4">
             <div class="space-y-1">
                 <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit">Username</label>
-                <input type="text" name="username" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors" placeholder="Enter username" required>
+                <input type="text" name="username" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="Enter username" required>
             </div>
             <div class="space-y-1">
                 <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit">Password</label>
-                <input type="password" name="password" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors" placeholder="Enter password" required>
+                <input type="password" name="password" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="Enter password" required>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all border border-slate-700 shadow-md">
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm transition-all border border-amber-400 shadow-md">
                 Sign In
             </button>
         </form>
@@ -356,13 +364,13 @@ def profile():
         <form method="POST" class="space-y-4">
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wide font-outfit">Current Password</label>
-                <input type="password" name="old_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors" required>
+                <input type="password" name="old_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" required>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-wide font-outfit">New Password</label>
-                <input type="password" name="new_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors" required>
+                <input type="password" name="new_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" required>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all border border-slate-700 shadow-md">
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm transition-all border border-amber-400 shadow-md">
                 Save Changes
             </button>
         </form>
@@ -376,23 +384,48 @@ def profile():
 def home():
     content = """
     <div class="w-full max-w-4xl mx-auto mt-12">
-        <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-md shadow-2xl p-12 md:p-16">
-            <div class="max-w-xl space-y-5">
+        <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-md shadow-[0_0_50px_-15px_rgba(245,158,11,0.1)] p-12 md:p-16">
+            
+            <!-- AIMCS Internal Panel Gold Motion Canvas -->
+            <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-30 flex flex-col justify-between py-6 z-0">
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="kinetic-track-left text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(245, 158, 11, 0.4);">
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                    </div>
+                </div>
+                
+                <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[14rem] text-transparent bg-clip-text bg-gradient-to-b from-amber-500/20 via-amber-500/5 to-transparent tracking-widest uppercase motion-center-glow z-0">
+                    AIMCS
+                </div>
+
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="kinetic-track-right text-[5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(251, 191, 36, 0.3);">
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Ambient Gradient Layer -->
+            <div class="absolute inset-0 bg-gradient-to-r from-[#0b0f19] via-[#0b0f19]/80 to-transparent z-10"></div>
+
+            <div class="relative z-20 max-w-xl space-y-5">
                 <div class="space-y-1">
-                    <h2 class="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-slate-50 via-slate-300 to-slate-500 tracking-wider font-outfit">
+                    <h2 class="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-400 to-amber-700 tracking-wider font-outfit drop-shadow-lg">
                         AIMCS
                     </h2>
-                    <h3 class="text-xs text-slate-400 font-light tracking-[0.3em] font-outfit uppercase">
+                    <h3 class="text-xs text-amber-500/80 font-bold tracking-[0.3em] font-outfit uppercase">
                         Enterprise Attendance Core
                     </h3>
                 </div>
                 
-                <p class="text-sm text-slate-400 leading-relaxed font-light border-l border-slate-800 pl-4">
+                <p class="text-sm text-slate-300 leading-relaxed font-light border-l border-amber-500/50 pl-4">
                     Generate temporary tokenized QR codes, stream real-time logs, verify security stamps, and export consolidated analytical charts over a fluid typographic interface workspace.
                 </p>
                 
                 <div class="pt-2">
-                    <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all border border-slate-700 shadow-md">
+                    <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] text-xs font-bold rounded-xl transition-all border border-amber-400 shadow-md">
                         Open Dashboard Portal <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
                     </a>
                 </div>
@@ -422,32 +455,32 @@ def dashboard():
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md">
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-amber-500/30 transition-colors">
                 <div class="space-y-0.5">
                     <p class="text-xs font-medium text-slate-400">Registered Students</p>
                     <h3 class="text-3xl font-bold text-white font-outfit tracking-tight">{students}</h3>
                 </div>
-                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-slate-400 rounded-xl flex items-center justify-center text-base shadow-sm">
+                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl flex items-center justify-center text-base shadow-sm">
                     <i class="fa-solid fa-users"></i>
                 </div>
             </div>
 
-            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md">
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-amber-500/30 transition-colors">
                 <div class="space-y-0.5">
                     <p class="text-xs font-medium text-slate-400">Total Scan Logs</p>
                     <h3 class="text-3xl font-bold text-white font-outfit tracking-tight">{attendance}</h3>
                 </div>
-                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-slate-400 rounded-xl flex items-center justify-center text-base shadow-sm">
+                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl flex items-center justify-center text-base shadow-sm">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
             </div>
 
-            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md">
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-emerald-500/30 transition-colors">
                 <div class="space-y-0.5">
                     <p class="text-xs font-medium text-slate-400">System Status</p>
                     <h3 class="text-base font-bold text-emerald-400 font-outfit mt-1">Operational</h3>
                 </div>
-                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-emerald-500 rounded-xl flex items-center justify-center text-base shadow-sm">
+                <div class="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center text-base shadow-sm">
                     <i class="fa-solid fa-server"></i>
                 </div>
             </div>
@@ -456,17 +489,17 @@ def dashboard():
         <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-md">
             <h3 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider font-outfit">Management Actions</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-qrcode text-xl text-slate-400 mb-2 group-hover:scale-105 transition-transform"></i>
-                    <span class="text-xs font-semibold text-white">Create QR Codes</span>
+                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-qrcode text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Create QR Codes</span>
                 </a>
-                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-excel text-xl text-slate-400 mb-2 group-hover:scale-105 transition-transform"></i>
-                    <span class="text-xs font-semibold text-white">Export Excel Sheet</span>
+                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-file-excel text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Export Excel Sheet</span>
                 </a>
-                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-zipper text-xl text-slate-400 mb-2 group-hover:scale-105 transition-transform"></i>
-                    <span class="text-xs font-semibold text-white">Download All QRs (.zip)</span>
+                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-file-zipper text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Download All QRs (.zip)</span>
                 </a>
             </div>
         </div>
@@ -527,13 +560,13 @@ def bulk():
         js_data = "\n".join(js_students)
 
         content = f"""
-        <div class="max-w-xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 text-center space-y-5 shadow-2xl">
+        <div class="max-w-xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 text-center space-y-5 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)]">
             <div class="inline-flex p-3.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
                 <i class="fa-solid fa-circle-check text-3xl"></i>
             </div>
             <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">QR Batch Generated</h2>
             <p class="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-                Successfully configured tokens for <span class="text-white font-bold">{success}</span> student(s). Automated relays are firing notifications via EmailJS.
+                Successfully configured tokens for <span class="text-amber-500 font-bold">{success}</span> student(s). Automated relays are firing notifications via EmailJS.
             </p>
 
             <script>
@@ -560,7 +593,7 @@ def bulk():
             </script>
 
             <div class="pt-4 border-t border-slate-800">
-                <a href='/dashboard' class="inline-flex items-center justify-center px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl border border-slate-700 shadow-md">
+                <a href='/dashboard' class="inline-flex items-center justify-center px-5 py-2 bg-amber-500 hover:bg-amber-600 text-[#030712] text-xs font-bold rounded-xl border border-amber-400 shadow-md">
                     Return to Dashboard
                 </a>
             </div>
@@ -579,21 +612,21 @@ def bulk():
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Validity Lock Starts</label>
-                    <input type='datetime-local' name='start_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors' required>
+                    <input type='datetime-local' name='start_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors' required>
                 </div>
                 <div class="space-y-1">
                     <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Validity Lock Closes</label>
-                    <input type='datetime-local' name='end_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-slate-600 transition-colors' required>
+                    <input type='datetime-local' name='end_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors' required>
                 </div>
             </div>
 
             <div class="space-y-1">
                 <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Recipient Profiles Matrix (Format: Name, Email)</label>
-                <textarea name='data' class='w-full h-40 bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-slate-600 transition-colors font-mono' placeholder="John Doe, john@example.com&#10;Jane Smith, jane@example.com" required></textarea>
+                <textarea name='data' class='w-full h-40 bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-500/50 transition-colors font-mono' placeholder="John Doe, john@example.com&#10;Jane Smith, jane@example.com" required></textarea>
                 <p class="text-[11px] text-slate-500 italic mt-1">One record line configuration per student separated by commas.</p>
             </div>
             
-            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm border border-slate-700 shadow-md">
+            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm border border-amber-400 shadow-md transition-all">
                 Deploy & Broadcast QR Codes
             </button>
         </form>
@@ -623,7 +656,8 @@ def analysis():
             ax.set_facecolor('#0b0f19')
             ax.patch.set_alpha(0.0)
             
-            attendance_counts.plot(kind='bar', color='#475569', width=0.35, ax=ax)
+            # Using Amber color for the chart to match the new theme
+            attendance_counts.plot(kind='bar', color='#f59e0b', width=0.35, ax=ax)
             
             ax.tick_params(colors='#94a3b8', labelsize=8)
             ax.spines['bottom'].set_color('#334155')
@@ -648,7 +682,7 @@ def analysis():
     if not df_logs.empty:
         for idx, row in df_logs.iterrows():
             table_rows += f"""
-            <tr class="border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/20">
+            <tr class="border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/40 transition-colors">
                 <td class="px-5 py-3 font-mono text-slate-500">#{row['id']}</td>
                 <td class="px-5 py-3 font-semibold text-white">{row['name']}</td>
                 <td class="px-5 py-3 font-mono text-slate-400">{row['time']}</td>
@@ -676,17 +710,17 @@ def analysis():
             
             <div class="lg:col-span-2 bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-5 space-y-3 shadow-md">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-outfit">Active Registration Directories</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/20">
+                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <tr class="bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-amber-500 uppercase tracking-wider">
                                 <th class="px-5 py-2.5">Index</th>
                                 <th class="px-5 py-2.5">Identifier</th>
                                 <th class="px-5 py-2.5">Scan Window Authorization Horizon</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800/40 text-xs text-slate-300">
-                            {"".join([f'<tr><td class="px-5 py-2.5 font-mono text-slate-500">#{i+1}</td><td class="px-5 py-2.5 font-semibold text-white">{r["name"]}</td><td class="px-5 py-2.5 font-mono text-slate-400 text-[11px]">{r["start_time"]} to {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-5 py-5 text-center text-slate-500">No profile parameters defined.</td></tr>'}
+                            {"".join([f'<tr class="hover:bg-slate-800/40 transition-colors"><td class="px-5 py-2.5 font-mono text-slate-500">#{i+1}</td><td class="px-5 py-2.5 font-semibold text-white">{r["name"]}</td><td class="px-5 py-2.5 font-mono text-slate-400 text-[11px]">{r["start_time"]} to {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-5 py-5 text-center text-slate-500">No profile parameters defined.</td></tr>'}
                         </tbody>
                     </table>
                 </div>
@@ -695,10 +729,10 @@ def analysis():
 
         <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-md">
             <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-outfit">Live Synchronization Stream</h3>
-            <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/20">
+            <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/40">
                 <div class="max-h-64 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10">
+                        <thead class="sticky top-0 bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-amber-500 uppercase tracking-wider z-10">
                             <tr>
                                 <th class="px-5 py-2.5">Log ID</th>
                                 <th class="px-5 py-2.5">Client Token Name</th>
@@ -751,7 +785,7 @@ def mark(token):
     border: 1px solid #1e293b; 
     padding: 40px 24px; 
     border-radius: 20px; 
-    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px -15px rgba(245,158,11,0.1);
     """
 
     if not data:
@@ -784,7 +818,7 @@ def mark(token):
                 <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700;">Transmission Sealed</h2>
                 <p style="color:#94a3b8; font-size:13px; margin:0 0 16px 0; line-height:1.5;">This attendance scan gateway has not activated yet.</p>
                 <div style="background-color:#1e293b; padding:12px; border-radius:10px; font-family:monospace; font-size:12px; color:#94a3b8;">
-                    Scheduled Release: <br/><strong style="font-size:14px; color:#fff; display:block; margin-top:4px;">{start_dt.strftime('%Y-%m-%d %H:%M')}</strong>
+                    Scheduled Release: <br/><strong style="font-size:14px; color:#f59e0b; display:block; margin-top:4px;">{start_dt.strftime('%Y-%m-%d %H:%M')}</strong>
                 </div>
             </div>
         </div>
