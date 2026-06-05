@@ -89,7 +89,7 @@ LAYOUT_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIMCS | Advanced Attendance System</title>
+    <title>AIMCS | Executive Attendance System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -99,71 +99,100 @@ LAYOUT_TEMPLATE = """
         })();
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #030712; /* Deep executive black */
+            background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, transparent 70%);
+            background-attachment: fixed;
+        }
+        
+        h1, h2, h3, h4, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Smooth fade animation for slider */
+        .fade-transition {
+            transition: opacity 1.5s ease-in-out;
+        }
     </style>
 </head>
-<body class="text-slate-200 min-h-screen flex">
+<body class="text-slate-300 min-h-screen flex selection:bg-indigo-500 selection:text-white">
 
     {% if current_user.is_authenticated %}
-    <aside class="w-72 bg-[#111827] border-r border-slate-800 flex flex-col fixed h-full z-20 transition-all duration-300">
-        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
-            <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-graduation-cap text-xl"></i>
+    <aside class="w-72 bg-[#0a0a0a]/90 backdrop-blur-xl border-r border-slate-800/50 flex flex-col fixed h-full z-20 transition-all duration-300 shadow-2xl">
+        <div class="p-8 border-b border-slate-800/50 flex items-center gap-4">
+            <div class="bg-gradient-to-br from-indigo-500 to-blue-700 p-3 rounded-xl text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]">
+                <i class="fa-solid fa-building-columns text-xl"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-wide">AIMCS</h1>
-                <p class="text-xs text-slate-400 font-medium">Attendance Management</p>
+                <h1 class="text-xl font-extrabold text-white tracking-widest font-outfit">AIMCS</h1>
+                <p class="text-[10px] text-indigo-400 font-semibold tracking-widest uppercase mt-1">Executive Core</p>
             </div>
         </div>
         
-        <nav class="flex-1 p-4 space-y-1.5 mt-4">
-            <a href="/" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-house text-base w-5"></i> Home Gateway
+        <nav class="flex-1 p-5 space-y-2 mt-2">
+            <a href="/" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
+                <i class="fa-solid fa-house text-lg w-6 text-center text-slate-500"></i> Home Gateway
             </a>
-            <a href="/dashboard" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-chart-pie text-base w-5"></i> Live Analytics Dashboard
+            <a href="/dashboard" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
+                <i class="fa-solid fa-chart-pie text-lg w-6 text-center text-indigo-400"></i> Analytics Dashboard
             </a>
-            <a href="/bulk" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-qrcode text-base w-5"></i> Bulk QR Engine
+            <a href="/bulk" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
+                <i class="fa-solid fa-qrcode text-lg w-6 text-center text-emerald-400"></i> Bulk QR Engine
             </a>
-            <a href="/analysis" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-chart-line text-base w-5"></i> Performance Report
+            <a href="/analysis" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
+                <i class="fa-solid fa-chart-line text-lg w-6 text-center text-blue-400"></i> Performance Report
             </a>
-            <a href="/profile" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-user-gear text-base w-5"></i> Security Settings
+            <a href="/profile" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
+                <i class="fa-solid fa-user-shield text-lg w-6 text-center text-amber-400"></i> Security Settings
             </a>
-            <a href="/logout" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-300">
-                <i class="fa-solid fa-right-from-bracket text-base w-5"></i> Terminate Session
-            </a>
+            <div class="pt-4 mt-4 border-t border-slate-800/50">
+                <a href="/logout" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-300">
+                    <i class="fa-solid fa-power-off text-lg w-6 text-center"></i> Terminate Session
+                </a>
+            </div>
         </nav>
 
-        <div class="p-4 border-t border-slate-800">
-            <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+        <div class="p-6">
+            <div class="glass-panel p-4 rounded-xl flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-inner">
                     {{ current_user.username[0].upper() }}
                 </div>
                 <div class="truncate">
-                    <p class="text-xs font-semibold text-white truncate">{{ current_user.username }}</p>
-                    <p class="text-[10px] text-slate-400 truncate">secure-session@active</p>
+                    <p class="text-sm font-bold text-white truncate font-outfit">{{ current_user.username }}</p>
+                    <p class="text-[10px] text-emerald-400 font-mono tracking-wider truncate">SysAdmin Online</p>
                 </div>
             </div>
         </div>
     </aside>
     {% endif %}
 
-    <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col">
-        <header class="h-20 bg-[#111827]/50 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
-            <div class="flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">AIMCS Core Ingestion Node: Operational</p>
+    <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative z-10">
+        <header class="h-24 bg-[#030712]/70 backdrop-blur-xl border-b border-slate-800/50 flex items-center justify-between px-10 sticky top-0 z-30">
+            <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                </span>
+                <p class="text-[11px] font-bold tracking-widest text-slate-300 uppercase font-outfit">AIMCS Operational</p>
             </div>
-            <div class="text-sm font-medium text-slate-300">
-                <i class="fa-regular fa-calendar-days mr-2 text-slate-400"></i> <span id="liveClock"></span>
+            <div class="text-sm font-medium text-slate-300 flex items-center gap-3 glass-panel px-5 py-2.5 rounded-xl">
+                <i class="fa-regular fa-clock text-indigo-400"></i> <span id="liveClock" class="font-mono tracking-wider text-xs"></span>
             </div>
         </header>
 
-        <div class="p-8 flex-1 flex flex-col justify-start">
+        <div class="p-10 flex-1 flex flex-col justify-start max-w-7xl mx-auto w-full">
             {{ content | safe }}
         </div>
     </main>
@@ -171,7 +200,8 @@ LAYOUT_TEMPLATE = """
     <script>
         function updateClock() {
             const now = new Date();
-            document.getElementById('liveClock').innerText = now.toLocaleString();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('liveClock').innerText = now.toLocaleDateString('en-US', options);
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -205,33 +235,42 @@ def login():
             error_msg = "Invalid systemic credential mappings."
 
     content = f"""
-    <div class="max-w-md w-full mx-auto my-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl">
-        <div class="text-center space-y-2">
-            <div class="inline-flex p-3 bg-blue-500/10 text-blue-500 rounded-xl mb-2">
-                <i class="fa-solid fa-lock text-2xl"></i>
+    <div class="max-w-lg w-full mx-auto my-auto glass-panel rounded-3xl p-10 space-y-8 relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+        
+        <div class="text-center space-y-3 relative z-10">
+            <div class="inline-flex p-4 bg-gradient-to-br from-indigo-500/20 to-blue-600/20 text-indigo-400 rounded-2xl mb-4 border border-indigo-500/30">
+                <i class="fa-solid fa-fingerprint text-4xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">AIMCS Access Verification</h2>
-            <p class="text-xs text-slate-400">Provide root configuration deployment credentials.</p>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Executive Access</h2>
+            <p class="text-sm text-slate-400">Authenticate to access AIMCS administration layers.</p>
         </div>
         
-        {f'<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">{error_msg}</div>' if error_msg else ''}
+        {f'<div class="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm rounded-xl font-medium text-center relative z-10"><i class="fa-solid fa-triangle-exclamation mr-2"></i>{error_msg}</div>' if error_msg else ''}
 
-        <form method="POST" class="space-y-4">
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Identified Username</label>
-                <input type="text" name="username" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="e.g. admin" required>
+        <form method="POST" class="space-y-5 relative z-10">
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">Identification ID</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-user text-slate-500 text-sm"></i>
+                    </div>
+                    <input type="text" name="username" class="w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="e.g. admin" required>
+                </div>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Secure Access Token (Password)</label>
-                <input type="password" name="password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="••••••••" required>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">Security Passphrase</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-slate-500 text-sm"></i>
+                    </div>
+                    <input type="password" name="password" class="w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl pl-11 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" placeholder="••••••••" required>
+                </div>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all font-medium shadow-lg shadow-blue-500/10">
-                Authenticate Session
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-4 bg-gradient-to-r from-indigo-600 to-blue-700 hover:from-indigo-500 hover:to-blue-600 text-white font-bold rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] hover:-translate-y-0.5">
+                Authenticate Session <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
             </button>
         </form>
-        <div class="text-center text-[11px] text-slate-500 font-mono">
-            Default Configuration Target: admin / admin123
-        </div>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
@@ -261,57 +300,97 @@ def profile():
             new_hash = generate_password_hash(new_pass)
             c.execute("UPDATE admin_users SET password=? WHERE id=?", (new_hash, current_user.id))
             conn.commit()
-            status_msg = """<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl font-medium text-center">Cryptographic passphrase mutation complete.</div>"""
+            status_msg = """<div class="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-xl font-medium text-center"><i class="fa-solid fa-check-circle mr-2"></i>Cryptographic passphrase mutation complete.</div>"""
         else:
-            status_msg = """<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">Root verification mismatch. Verification aborted.</div>"""
+            status_msg = """<div class="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm rounded-xl font-medium text-center"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Root verification mismatch. Verification aborted.</div>"""
         conn.close()
 
     content = f"""
-    <div class="max-w-xl mx-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6">
-        <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Security & Encryption Administration</h2>
-            <p class="text-xs text-slate-400 mt-1">Alter configuration system access layers dynamically.</p>
+    <div class="max-w-2xl mx-auto glass-panel rounded-3xl p-10 space-y-8">
+        <div class="border-b border-slate-800/50 pb-6">
+            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Security Protocol</h2>
+            <p class="text-sm text-slate-400 mt-2">Alter administrative access credentials securely.</p>
         </div>
 
         {status_msg}
 
-        <form method="POST" class="space-y-4">
-            <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Current Passphrase</label>
-                <input type="password" name="old_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" required>
+        <form method="POST" class="space-y-6">
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">Current Passphrase</label>
+                <input type="password" name="old_password" class="w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" required>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Core Target Passphrase</label>
-                <input type="password" name="new_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" required>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">New Core Passphrase</label>
+                <input type="password" name="new_password" class="w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all" required>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-blue-500/10">
-                Commit Cryptographic Changes
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                Commit Cryptographic Changes <i class="fa-solid fa-shield-check ml-2"></i>
             </button>
         </form>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= HOME =================
+# ================= HOME (WITH MOTION SLIDER) =================
 @app.route("/")
 @login_required
 def home():
     content = """
-    <div class="max-w-3xl mx-auto mt-12 text-center space-y-6">
-        <div class="inline-flex p-4 bg-blue-500/10 text-blue-500 rounded-3xl border border-blue-500/20 shadow-2xl shadow-blue-500/5 mb-2">
-            <i class="fa-solid fa-shield-halved text-5xl"></i>
+    <div class="w-full max-w-6xl mx-auto flex flex-col gap-8">
+        
+        <div class="relative w-full h-[500px] rounded-3xl overflow-hidden border border-slate-700/50 shadow-2xl group">
+            
+            <div id="hero-slider-bg" class="absolute inset-0 bg-cover bg-center fade-transition opacity-50 scale-105 group-hover:scale-100 transition-transform duration-[10s]"></div>
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent"></div>
+            
+            <div class="relative z-10 h-full flex flex-col justify-center px-12 md:px-20 w-full md:w-3/4">
+                <div class="inline-flex p-4 bg-indigo-500/20 text-indigo-400 rounded-2xl border border-indigo-500/30 backdrop-blur-md mb-6 w-fit shadow-[0_0_30px_rgba(79,70,229,0.3)]">
+                    <i class="fa-solid fa-network-wired text-4xl"></i>
+                </div>
+                <h2 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight font-outfit mb-6 leading-tight">
+                    Next-Gen <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">Attendance</span> Architecture.
+                </h2>
+                <p class="text-lg text-slate-300 max-w-2xl leading-relaxed mb-8 font-light">
+                    Instantaneous encrypted tracking, automated structural reporting, and granular lifecycle auditing workflows engineered for modern institutions.
+                </p>
+                <div class="flex gap-4">
+                    <a href="/dashboard" class="inline-flex items-center justify-center px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:-translate-y-1">
+                        Initialize Dashboard <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                    </a>
+                </div>
+            </div>
         </div>
-        <h2 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">
-            AIMCS Core Infrastructure
-        </h2>
-        <p class="text-lg text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Instantaneous encrypted attendance matrix tracking, structural analytical mapping, automated notification dispatches, and granular user lifecycle auditing workflows.
-        </p>
-        <div class="pt-4">
-            <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.02]">
-                Access Control Dashboard <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
-            </a>
-        </div>
+
+        <script>
+            // Executive Motion Pictures Slider Logic
+            const sliderImages = [
+                'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600', // Modern Office/Campus
+                'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=1600', // Tech Environment
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1600'  // Abstract Network
+            ];
+            
+            let currentImageIdx = 0;
+            const sliderElement = document.getElementById('hero-slider-bg');
+            
+            function changeSlide() {
+                sliderElement.style.opacity = '0';
+                
+                setTimeout(() => {
+                    sliderElement.style.backgroundImage = `url('${sliderImages[currentImageIdx]}')`;
+                    sliderElement.style.opacity = '0.4'; // Maintain subtle opacity behind text
+                    currentImageIdx = (currentImageIdx + 1) % sliderImages.length;
+                }, 1500); // Wait for fade out
+            }
+
+            // Initialize first image immediately
+            sliderElement.style.backgroundImage = `url('${sliderImages[0]}')`;
+            sliderElement.style.opacity = '0.4';
+            currentImageIdx = 1;
+            
+            // Start interval
+            setInterval(changeSlide, 6000);
+        </script>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
@@ -332,58 +411,64 @@ def dashboard():
     conn.close()
 
     content = f"""
-    <div class="space-y-8">
-        <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">System Overview</h2>
-            <p class="text-sm text-slate-400">AIMCS Environment real-time telemetry analytics calculations.</p>
+    <div class="space-y-8 w-full max-w-7xl mx-auto">
+        <div class="border-b border-slate-800/50 pb-6 flex items-center justify-between">
+            <div>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Command Center</h2>
+                <p class="text-sm text-slate-400 mt-1">Real-time telemetry and infrastructure utilization.</p>
+            </div>
+            <div class="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400 text-xs font-bold tracking-widest uppercase">
+                Status: Optimal
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between">
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-slate-400">Total Registered Students</p>
-                    <h3 class="text-3xl font-bold text-white tracking-tight">{students}</h3>
+            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between group hover:border-indigo-500/50 transition-colors">
+                <div class="space-y-2">
+                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Registered Entities</p>
+                    <h3 class="text-5xl font-extrabold text-white tracking-tight font-outfit">{students}</h3>
                 </div>
-                <div class="h-12 w-12 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center text-xl">
+                <div class="h-16 w-16 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-users"></i>
                 </div>
             </div>
 
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between">
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-slate-400">Total Valid Checks Logged</p>
-                    <h3 class="text-3xl font-bold text-emerald-400 tracking-tight">{attendance}</h3>
+            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between group hover:border-emerald-500/50 transition-colors">
+                <div class="space-y-2">
+                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Verified Signatures</p>
+                    <h3 class="text-5xl font-extrabold text-emerald-400 tracking-tight font-outfit">{attendance}</h3>
                 </div>
-                <div class="h-12 w-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-circle-check"></i>
+                <div class="h-16 w-16 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-shield-check"></i>
                 </div>
             </div>
 
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between md:col-span-2 lg:col-span-1">
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-slate-400">Database Framework</p>
-                    <h3 class="text-lg font-bold text-white tracking-tight">SQLite3 Infrastructure</h3>
+            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between md:col-span-2 lg:col-span-1 group hover:border-purple-500/50 transition-colors">
+                <div class="space-y-2">
+                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Database Engine</p>
+                    <h3 class="text-2xl font-extrabold text-white tracking-tight font-outfit mt-2">SQLite v3</h3>
+                    <p class="text-xs text-slate-500 font-mono">Encrypted Local Cluster</p>
                 </div>
-                <div class="h-12 w-12 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-database"></i>
+                <div class="h-16 w-16 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 text-purple-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-server"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-[#111827] border border-slate-800/80 rounded-2xl p-6">
-            <h3 class="text-base font-semibold text-white mb-4">Operational Administrative Control Console</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-plus-circle text-2xl text-blue-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Bulk QR Generator</span>
+        <div class="glass-panel rounded-3xl p-8 mt-8">
+            <h3 class="text-sm font-bold text-white uppercase tracking-widest font-outfit mb-6">Administrative Workflows</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <a href="/bulk" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-indigo-500/10 rounded-2xl border border-slate-700/50 hover:border-indigo-500/50 text-center group transition-all">
+                    <i class="fa-solid fa-qrcode text-4xl text-indigo-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Generate Matrix Data</span>
                 </a>
-                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-excel text-2xl text-emerald-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Export Excel Sheet</span>
+                <a href="/download" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-emerald-500/10 rounded-2xl border border-slate-700/50 hover:border-emerald-500/50 text-center group transition-all">
+                    <i class="fa-solid fa-file-excel text-4xl text-emerald-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Export Relational Excel</span>
                 </a>
-                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-zipper text-2xl text-amber-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Download QR Archive</span>
+                <a href="/download_qrs" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-amber-500/10 rounded-2xl border border-slate-700/50 hover:border-amber-500/50 text-center group transition-all">
+                    <i class="fa-solid fa-box-archive text-4xl text-amber-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Download Token Archive</span>
                 </a>
             </div>
         </div>
@@ -453,13 +538,13 @@ def bulk():
         js_data = "\n".join(js_students)
 
         content = f"""
-        <div class="max-w-2xl mx-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 text-center space-y-6">
-            <div class="inline-flex p-4 bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
-                <i class="fa-solid fa-circle-check text-4xl"></i>
+        <div class="max-w-3xl mx-auto glass-panel rounded-3xl p-12 text-center space-y-8">
+            <div class="inline-flex p-6 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                <i class="fa-solid fa-check-double text-5xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">AIMCS QR Generation Initiated</h2>
-            <p class="text-slate-400 text-sm max-w-sm mx-auto">
-                Successfully configured dynamic targets for <span class="text-white font-semibold">{success}</span> recipients. Pipelines are processing background tasks via browser API contexts.
+            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Transmission Initiated</h2>
+            <p class="text-slate-300 text-base max-w-md mx-auto leading-relaxed">
+                Successfully encoded payloads for <span class="text-white font-bold px-2 py-1 bg-slate-800 rounded">{success}</span> entities. Automated background pipelines are dispatching credentials via API frameworks.
             </p>
 
             <script>
@@ -486,9 +571,9 @@ def bulk():
             }});
             </script>
 
-            <div class="pt-4 border-t border-slate-800">
-                <a href='/dashboard' class="inline-flex w-full items-center justify-center px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl text-sm transition-all">
-                    Return to Management Dashboard
+            <div class="pt-8 border-t border-slate-800/50">
+                <a href='/dashboard' class="inline-flex items-center justify-center px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg hover:-translate-y-0.5">
+                    <i class="fa-solid fa-layer-group mr-2"></i> Return to Command Center
                 </a>
             </div>
         </div>
@@ -496,31 +581,34 @@ def bulk():
         return render_template_string(LAYOUT_TEMPLATE, content=content)
 
     content = """
-    <div class="max-w-3xl mx-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6">
-        <div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Bulk Dispatch Architecture</h2>
-            <p class="text-xs text-slate-400 mt-1">Configure valid verification temporal windows and recipient structural array datasets mappings.</p>
+    <div class="max-w-4xl mx-auto glass-panel rounded-3xl p-10 space-y-8">
+        <div class="border-b border-slate-800/50 pb-6">
+            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Mass Deployment Engine</h2>
+            <p class="text-sm text-slate-400 mt-2">Define temporal parameters and input structured entity array data.</p>
         </div>
 
-        <form method='POST' class="space-y-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label class='text-xs font-semibold text-slate-400 uppercase tracking-wider'>Window Start Runtime</label>
-                    <input type='datetime-local' name='start_time' class='w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors' required>
+        <form method='POST' class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class='text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit'>Initiation Timestamp</label>
+                    <input type='datetime-local' name='start_time' class='w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all' required>
                 </div>
-                <div class="space-y-1.5">
-                    <label class='text-xs font-semibold text-slate-400 uppercase tracking-wider'>Window Termination Runtime</label>
-                    <input type='datetime-local' name='end_time' class='w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors' required>
+                <div class="space-y-2">
+                    <label class='text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit'>Termination Timestamp</label>
+                    <input type='datetime-local' name='end_time' class='w-full bg-[#030712]/50 border border-slate-700/50 rounded-xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all' required>
                 </div>
             </div>
 
-            <div class="space-y-1.5">
-                <label class='text-xs font-semibold text-slate-400 uppercase tracking-wider'>Student Structured Array Dataset (Format: Name,Email)</label>
-                <textarea name='data' class='w-full h-44 bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors font-mono' placeholder="Jane Doe, jane@example.com&#10;John Smith, john@example.com" required></textarea>
+            <div class="space-y-2">
+                <label class='text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit'>Entity Array (Format: Name, Email)</label>
+                <div class="relative">
+                    <textarea name='data' class='w-full h-60 bg-[#030712]/50 border border-slate-700/50 rounded-xl p-5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono leading-relaxed' placeholder="Alexander Pierce, alex@enterprise.com&#10;Sophia Chen, sophia@enterprise.com" required></textarea>
+                    <div class="absolute bottom-4 right-4 bg-slate-800 px-2 py-1 rounded text-[10px] text-slate-400 font-mono border border-slate-700">CSV Mode</div>
+                </div>
             </div>
             
-            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-blue-500/10">
-                Execute Encryption & Launch Notification Pipelines
+            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-4 bg-gradient-to-r from-indigo-600 to-blue-700 hover:from-indigo-500 hover:to-blue-600 text-white font-bold rounded-xl text-base transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:shadow-[0_0_30px_rgba(79,70,229,0.6)] hover:-translate-y-0.5">
+                <i class="fa-solid fa-rocket mr-3"></i> Execute Cryptographic Generation Pipeline
             </button>
         </form>
     </div>
@@ -542,25 +630,29 @@ def analysis():
             df_logs['date_only'] = df_logs['time'].apply(lambda x: x.split()[0] if x else '')
             attendance_counts = df_logs.groupby('date_only').size()
 
-            plt.figure(figsize=(7, 3.2))
+            plt.figure(figsize=(8, 4))
             plt.gcf().patch.set_facecolor('#111827')
+            plt.gcf().patch.set_alpha(0.0) # Transparent background for the figure
             ax = plt.gca()
             ax.set_facecolor('#111827')
+            ax.patch.set_alpha(0.0) # Transparent background for the axes
             
-            attendance_counts.plot(kind='bar', color='#2563eb', edgecolor='#3b82f6', width=0.4, ax=ax)
+            # Premium bar chart styling
+            bars = attendance_counts.plot(kind='bar', color='#4f46e5', width=0.5, ax=ax)
             
-            ax.tick_params(colors='white', labelsize=8)
+            ax.tick_params(colors='#94a3b8', labelsize=9)
             ax.spines['bottom'].set_color('#334155')
             ax.spines['left'].set_color('#334155')
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
-            ax.grid(axis='y', color='#334155', linestyle='--', alpha=0.5)
+            ax.grid(axis='y', color='#334155', linestyle='--', alpha=0.3)
             
-            plt.title("Chronological Logs Mapping", color='white', fontsize=10, pad=10, weight='bold')
+            plt.title("Chronological Verification Frequency", color='#f8fafc', fontsize=12, pad=15, weight='bold', fontname='sans-serif')
+            plt.xticks(rotation=45, ha='right')
             plt.tight_layout()
             
             img_buf = io.BytesIO()
-            plt.savefig(img_buf, format='png', facecolor=plt.gcf().get_facecolor(), bbox_inches='tight')
+            plt.savefig(img_buf, format='png', transparent=True, bbox_inches='tight')
             img_buf.seek(0)
             import base64
             chart_url = "data:image/png;base64," + base64.b64encode(img_buf.getvalue()).decode('utf-8')
@@ -572,62 +664,66 @@ def analysis():
     if not df_logs.empty:
         for idx, row in df_logs.iterrows():
             table_rows += f"""
-            <tr class="border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/20 transition-colors">
-                <td class="px-6 py-3.5 font-medium text-white">{row['id']}</td>
-                <td class="px-6 py-3.5 font-semibold text-blue-400">{row['name']}</td>
-                <td class="px-6 py-3.5 font-mono text-slate-400">{row['time']}</td>
-                <td class="px-6 py-3.5"><span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-md text-[10px] font-bold">VERIFIED</span></td>
+            <tr class="border-b border-slate-800/50 text-slate-300 text-sm hover:bg-indigo-500/5 transition-colors">
+                <td class="px-6 py-4 font-mono text-slate-500 text-xs">{row['id']}</td>
+                <td class="px-6 py-4 font-bold text-white">{row['name']}</td>
+                <td class="px-6 py-4 font-mono text-indigo-300 text-xs">{row['time']}</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-[10px] font-bold tracking-widest uppercase">Verified</span></td>
             </tr>
             """
     else:
         table_rows = """
         <tr>
-            <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500 font-medium">No system check-ins captured within the relational ledger array.</td>
+            <td colspan="4" class="px-6 py-16 text-center text-sm text-slate-500 font-medium">No verified interactions logged in the relational database.</td>
         </tr>
         """
 
     content = f"""
-    <div class="space-y-8">
-        <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">Analytical Metric Performance Reports</h2>
-            <p class="text-sm text-slate-400">AIMCS statistical metrics computations framework.</p>
+    <div class="space-y-8 w-full max-w-7xl mx-auto">
+        <div class="border-b border-slate-800/50 pb-6">
+            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Intelligence Analytics</h2>
+            <p class="text-sm text-slate-400 mt-1">Cross-referencing configuration limits and real-time ingestion streams.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-[#111827] border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-center">
-                {f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Insufficient timeline allocation instances to draw live plot configurations.</div>'}
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="xl:col-span-1 glass-panel rounded-3xl p-6 flex flex-col items-center justify-center border-t-4 border-t-indigo-500">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit mb-4 w-full text-left">Activity Plot</h3>
+                {f'<img src="{chart_url}" class="w-full drop-shadow-2xl" />' if chart_url else '<div class="text-slate-600 text-xs text-center py-20 font-medium border border-dashed border-slate-800 rounded-xl w-full">Insufficient data points to plot timeline.</div>'}
             </div>
             
-            <div class="lg:col-span-2 bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Active Token Allocations Table</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/50">
+            <div class="xl:col-span-2 glass-panel rounded-3xl p-6 space-y-4 border-t-4 border-t-blue-500">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">Active Cryptographic Tokens</h3>
+                    <span class="text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded font-mono border border-blue-500/20">{len(df_config)} Nodes</span>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-800/50 bg-[#030712]/50">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-slate-800/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="px-6 py-3">Mapping Instance</th>
-                                <th class="px-6 py-3">Identified Subject Target</th>
-                                <th class="px-6 py-3">Configured Temporal Allocation Bounds</th>
+                            <tr class="bg-slate-900/80 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="px-6 py-4">Index</th>
+                                <th class="px-6 py-4">Identity Array</th>
+                                <th class="px-6 py-4">Temporal Bounds (Start &rarr; End)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60 text-xs text-slate-300">
-                            {"".join([f'<tr class="hover:bg-slate-800/10"><td class="px-6 py-3 font-mono text-slate-500">#{i+1}</td><td class="px-6 py-3 font-medium text-white">{r["name"]}</td><td class="px-6 py-3 font-mono text-slate-400 text-[11px]">{r["start_time"]} &rarr; {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-6 py-6 text-center text-slate-500">Empty config structural dataset elements.</td></tr>'}
+                        <tbody class="divide-y divide-slate-800/50 text-sm text-slate-300">
+                            {"".join([f'<tr class="hover:bg-blue-500/5"><td class="px-6 py-4 font-mono text-slate-600 text-xs">#{i+1}</td><td class="px-6 py-4 font-bold text-white">{r["name"]}</td><td class="px-6 py-4 font-mono text-slate-400 text-xs"><span class="text-emerald-400/80">{r["start_time"]}</span> &rarr; <span class="text-rose-400/80">{r["end_time"]}</span></td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-6 py-10 text-center text-slate-600 font-medium">Matrix unpopulated.</td></tr>'}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-            <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Real-Time Ingestion Logs Stream</h3>
-            <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/50">
-                <div class="max-h-96 overflow-y-auto">
+        <div class="glass-panel rounded-3xl p-6 border-t-4 border-t-emerald-500">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit mb-6">Immutable Ledger Stream</h3>
+            <div class="overflow-hidden border border-slate-800/50 rounded-xl bg-[#030712]/50 shadow-inner">
+                <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-[#161f30] border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10">
+                        <thead class="sticky top-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 shadow-sm">
                             <tr>
-                                <th class="px-6 py-3">Ingestion Index</th>
-                                <th class="px-6 py-3">Validated Entity Target</th>
-                                <th class="px-6 py-3">System Timestamp Record</th>
-                                <th class="px-6 py-3">Cryptographic State</th>
+                                <th class="px-6 py-4">Packet ID</th>
+                                <th class="px-6 py-4">Verified Subject</th>
+                                <th class="px-6 py-4">Network Timestamp</th>
+                                <th class="px-6 py-4">State</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -637,6 +733,23 @@ def analysis():
                 </div>
             </div>
         </div>
+        
+        <style>
+            /* Custom Scrollbar for Ledger */
+            .custom-scrollbar::-webkit-scrollbar {{
+                width: 6px;
+            }}
+            .custom-scrollbar::-webkit-scrollbar-track {{
+                background: rgba(15, 23, 42, 0.5); 
+            }}
+            .custom-scrollbar::-webkit-scrollbar-thumb {{
+                background: rgba(79, 70, 229, 0.3); 
+                border-radius: 10px;
+            }}
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {{
+                background: rgba(79, 70, 229, 0.6); 
+            }}
+        </style>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
@@ -655,12 +768,42 @@ def mark(token):
 
     data = c.fetchone()
 
+    # Premium Public Facing Styles
+    BASE_PUBLIC_STYLE = """
+    font-family: 'Inter', system-ui, sans-serif; 
+    text-align:center; 
+    padding:100px 20px; 
+    background-color:#030712; 
+    background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, transparent 70%);
+    color:#f8fafc; 
+    min-height:100vh; 
+    box-sizing:border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    """
+    
+    CARD_STYLE = """
+    max-width:550px; 
+    width: 100%;
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border:1px solid rgba(255,255,255,0.05); 
+    padding:50px; 
+    border-radius:32px; 
+    box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);
+    """
+
     if not data:
         conn.close()
-        return """
-        <div style="font-family:Arial,sans-serif; text-align:center; padding:50px; background:#0b0f19; min-height:100vh; color:white; box-sizing:border-box;">
-            <h2 style="color:#ef4444; margin-top:100px;">Invalid Cryptographic Token</h2>
-            <p style="color:#94a3b8;">The AIMCS scanning node returned an unmapped configuration sequence.</p>
+        return f"""
+        <div style="{BASE_PUBLIC_STYLE}">
+            <div style="{CARD_STYLE}">
+                <div style="color:#ef4444; font-size:64px; margin-bottom:24px; text-shadow: 0 0 30px rgba(239,68,68,0.4);">✖</div>
+                <h2 style="margin:0 0 12px 0; font-size:28px; font-weight:800; font-family: 'Arial', sans-serif;">Invalid Cryptographic Token</h2>
+                <p style="color:#94a3b8; font-size:16px; line-height:1.6;">The AIMCS edge node failed to resolve this configuration sequence. The payload may be corrupted or manually altered.</p>
+            </div>
         </div>
         """
 
@@ -677,13 +820,13 @@ def mark(token):
     if now < start_dt:
         conn.close()
         return f"""
-        <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
-                <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">🛑</div>
-                <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Window Closed</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This attendance tracking session has not reached initialized start verification timelines.</p>
-                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#3b82f6;">
-                    Target Runtime Start: {start_dt.strftime('%Y-%m-%d %H:%M')}
+        <div style="{BASE_PUBLIC_STYLE}">
+            <div style="{CARD_STYLE}">
+                <div style="color:#ef4444; font-size:64px; margin-bottom:24px; text-shadow: 0 0 30px rgba(239,68,68,0.4);">🛑</div>
+                <h2 style="margin:0 0 12px 0; font-size:28px; font-weight:800;">Validation Window Closed</h2>
+                <p style="color:#94a3b8; font-size:16px; margin:0 0 30px 0; line-height:1.6;">This tracking sequence has not yet reached its initialized operational timeframe.</p>
+                <div style="background-color:rgba(30, 41, 59, 0.5); padding:20px; border-radius:16px; font-family:monospace; font-size:14px; color:#60a5fa; border:1px solid rgba(59, 130, 246, 0.2);">
+                    Awaiting Target Start: <br/><strong style="font-size:18px; color:#fff; display:block; margin-top:8px;">{start_dt.strftime('%Y-%m-%d %H:%M')}</strong>
                 </div>
             </div>
         </div>
@@ -692,13 +835,13 @@ def mark(token):
     if now > end_dt:
         conn.close()
         return f"""
-        <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
-                <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">⚠️</div>
-                <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Link Terminated</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The temporal processing window bounds for this entity target has fully closed.</p>
-                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#f43f5e;">
-                    Terminated Runtime Bound: {end_dt.strftime('%Y-%m-%d %H:%M')}
+        <div style="{BASE_PUBLIC_STYLE}">
+            <div style="{CARD_STYLE}">
+                <div style="color:#f59e0b; font-size:64px; margin-bottom:24px; text-shadow: 0 0 30px rgba(245,158,11,0.4);">⚠️</div>
+                <h2 style="margin:0 0 12px 0; font-size:28px; font-weight:800;">Link Terminated</h2>
+                <p style="color:#94a3b8; font-size:16px; margin:0 0 30px 0; line-height:1.6;">The temporal processing window bounds for this entity have officially expired.</p>
+                <div style="background-color:rgba(30, 41, 59, 0.5); padding:20px; border-radius:16px; font-family:monospace; font-size:14px; color:#f43f5e; border:1px solid rgba(244, 63, 94, 0.2);">
+                    Terminated At: <br/><strong style="font-size:18px; color:#fff; display:block; margin-top:8px;">{end_dt.strftime('%Y-%m-%d %H:%M')}</strong>
                 </div>
             </div>
         </div>
@@ -714,12 +857,15 @@ def mark(token):
     if c.fetchone():
         conn.close()
         return f"""
-        <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
-                <div style="color:#f59e0b; font-size:48px; margin-bottom:20px;">🔁</div>
-                <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Sequence Redundancy</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely within the logging database bounds.</p>
-                <h3 style="color:#f59e0b; margin:0; font-size:18px;">{name} Already Logged</h3>
+        <div style="{BASE_PUBLIC_STYLE}">
+            <div style="{CARD_STYLE}">
+                <div style="color:#3b82f6; font-size:64px; margin-bottom:24px; text-shadow: 0 0 30px rgba(59,130,246,0.4);">🔁</div>
+                <h2 style="margin:0 0 12px 0; font-size:28px; font-weight:800;">Sequence Redundancy</h2>
+                <p style="color:#94a3b8; font-size:16px; margin:0 0 24px 0; line-height:1.6;">Entity ingestion already processed securely within the logging database bounds.</p>
+                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:24px;">
+                    <h3 style="color:#ffffff; margin:0; font-size:22px; font-weight:700;">{name}</h3>
+                    <p style="color:#3b82f6; font-size:12px; text-transform:uppercase; letter-spacing:2px; margin-top:8px; font-weight:bold;">Status: Already Logged</p>
+                </div>
             </div>
         </div>
         """
@@ -735,12 +881,15 @@ def mark(token):
     conn.close()
 
     return f"""
-    <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-        <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
-            <div style="color:#10b981; font-size:48px; margin-bottom:20px;">✅</div>
-            <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700; color:#10b981;">Ingestion Verified</h2>
-            <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the secure database array.</p>
-            <h3 style="color:#ffffff; margin:0; font-size:20px; font-weight:600; border-top:1px solid #1e293b; padding-top:20px;">{name}</h3>
+    <div style="{BASE_PUBLIC_STYLE}">
+        <div style="{CARD_STYLE}">
+            <div style="color:#10b981; font-size:64px; margin-bottom:24px; text-shadow: 0 0 30px rgba(16,185,129,0.4);">✅</div>
+            <h2 style="margin:0 0 12px 0; font-size:28px; font-weight:800; color:#10b981;">Ingestion Verified</h2>
+            <p style="color:#94a3b8; font-size:16px; margin:0 0 30px 0; line-height:1.6;">Attendance successfully routed and locked inside the central database array.</p>
+            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:24px; border-radius:20px;">
+                <h3 style="color:#ffffff; margin:0; font-size:24px; font-weight:800;">{name}</h3>
+                <p style="color:#10b981; font-size:12px; font-family:monospace; margin-top:8px;">{time_str}</p>
+            </div>
         </div>
     </div>
     """
