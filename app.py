@@ -141,6 +141,7 @@ LAYOUT_TEMPLATE = """
 <body class="text-slate-300 min-h-screen flex">
 
     {% if current_user.is_authenticated %}
+    <!-- Sidebar Menu Navigation -->
     <aside class="w-72 bg-[#0b0f19] border-r border-slate-800 flex flex-col fixed h-full z-20">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="bg-slate-800 p-2.5 rounded-xl text-white shadow-md border border-slate-700">
@@ -187,7 +188,8 @@ LAYOUT_TEMPLATE = """
     </aside>
     {% endif %}
 
-    <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col">
+    <!-- Core Content Container -->
+    <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative overflow-hidden">
         <header class="h-20 bg-[#030712]/40 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -198,7 +200,7 @@ LAYOUT_TEMPLATE = """
             </div>
         </header>
 
-        <div class="p-8 flex-1 flex flex-col justify-start max-w-6xl w-full mx-auto">
+        <div class="p-8 flex-1 flex flex-col justify-start max-w-6xl w-full mx-auto relative z-10">
             {{ content | safe }}
         </div>
     </main>
@@ -215,7 +217,7 @@ LAYOUT_TEMPLATE = """
 </html>
 """
 
-# ================= LOGIN ROUTE =================
+# ================= LOGIN ROUTE (UPGRADED WITH PREMIUM CANVAS) =================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -240,7 +242,23 @@ def login():
             error_msg = "Invalid username or password."
 
     content = f"""
-    <div class="max-w-md w-full mx-auto my-auto bg-[#0b0f19] border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl">
+    <!-- Elegant Full-Screen Kinetic Typography Background Canvas -->
+    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-20 flex flex-col justify-between py-12 z-0">
+        <div class="motion-track-fast-left whitespace-nowrap text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.06);">
+            AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+        </div>
+        
+        <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[12rem] text-transparent bg-clip-text bg-gradient-to-b from-white/5 via-white/[0.01] to-transparent tracking-widest uppercase motion-center-glowing">
+            AIMCS
+        </div>
+
+        <div class="motion-track-fast-right whitespace-nowrap text-[4.5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.04);">
+            AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
+        </div>
+    </div>
+
+    <!-- Floating Frosted Login Card -->
+    <div class="relative z-10 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl">
         <div class="text-center space-y-2">
             <div class="inline-flex p-3.5 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl mb-1">
                 <i class="fa-solid fa-lock text-2xl"></i>
@@ -270,6 +288,13 @@ def login():
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
+
+# ================= FIXED LOGOUT ROUTE =================
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 # ================= SECURITY SETTINGS =================
 @app.route("/profile", methods=["GET", "POST"])
@@ -320,33 +345,41 @@ def profile():
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= HOME (PREMIUM AIMCS KINETIC TYPOGRAPHY MOTION BACKGROUND) =================
+# ================= HOME =================
 @app.route("/")
 @login_required
 def home():
     content = """
     <div class="w-full max-w-4xl mx-auto mt-6">
         
+        <!-- Premium Home Panel with AIMCS Letter Motion Canvas -->
         <div class="relative w-full h-[460px] rounded-2xl overflow-hidden border border-slate-800 bg-[#070b12] shadow-2xl flex items-center px-12 md:px-16">
             
+            <!-- AIMCS Letters Motion Background Canvas -->
             <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-30 flex flex-col justify-between py-6">
+                <!-- Track 1: Outlined Letters Scrolling Left Fast -->
                 <div class="motion-track-fast-left whitespace-nowrap text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(255,255,255,0.06);">
                     AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
                 </div>
                 
+                <!-- Center: Giant Elegant Platinum Shifting Glow Letter Array -->
                 <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[14rem] text-transparent bg-clip-text bg-gradient-to-b from-white/10 via-white/[0.02] to-transparent tracking-widest uppercase motion-center-glowing z-0">
                     AIMCS
                 </div>
 
+                <!-- Track 2: Outlined Letters Scrolling Right Fast -->
                 <div class="motion-track-fast-right whitespace-nowrap text-[4.5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(255,255,255,0.04);">
                     AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS AIMCS
                 </div>
             </div>
 
+            <!-- Deep Ambient Gradient Layer over content backdrops -->
             <div class="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent z-10"></div>
 
+            <!-- Dashboard Content Layout Panel -->
             <div class="relative z-20 max-w-xl space-y-5">
                 <div class="space-y-1">
+                    <!-- Brand Title with Silver / Platinum Gradient Fill -->
                     <h2 class="text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-slate-50 via-slate-300 to-slate-500 tracking-wider font-outfit drop-shadow-md">
                         AIMCS
                     </h2>
@@ -742,7 +775,7 @@ def mark(token):
     start_time = data[1]
     end_time = data[2]
 
-    # Maintaining your current adjusted UTC timezone rules (+4 Hours)
+    # Maintaining adjusted UTC timezone rules (+4 Hours)
     now = datetime.utcnow() + timedelta(hours=4)
 
     start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
