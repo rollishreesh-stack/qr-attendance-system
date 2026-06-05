@@ -1,5 +1,6 @@
-from flask import Flask, request, redirect, send_file, render_template_string
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
+from flask import Flask, request, redirect, send_file, render_template_string, url_for, flash
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 from datetime import datetime, timedelta
 import secrets
@@ -23,6 +24,14 @@ def init_db():
     c = conn.cursor()
 
     c.execute("""
+    CREATE TABLE IF NOT EXISTS admin_users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    c.execute("""
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
@@ -41,22 +50,37 @@ def init_db():
     )
     """)
 
+    # Setup default admin account if table is empty (User: admin / Pass: admin123)
+    c.execute("SELECT COUNT(*) FROM admin_users")
+    if c.fetchone()[0] == 0:
+        hashed_pw = generate_password_hash("admin123")
+        c.execute("INSERT INTO admin_users (username, password) VALUES (?, ?)", ("admin", hashed_pw))
+
     conn.commit()
     conn.close()
 
 init_db()
 
-# ================= LOGIN =================
+# ================= LOGIN MANAGER =================
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = "login"
 
 class User(UserMixin):
-    def __init__(self, id):
+    def __init__(self, id, username):
         self.id = id
+        self.username = username
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id)
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("SELECT id, username FROM admin_users WHERE id=?", (user_id,))
+    data = c.fetchone()
+    conn.close()
+    if data:
+        return User(data[0], data[1])
+    return None
 
 # ================= PREMIUM MASTER LAYOUT =================
 LAYOUT_TEMPLATE = """
@@ -65,7 +89,7 @@ LAYOUT_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraAttend | Premium Analytics Portal</title>
+    <title>AIMCS | Advanced Attendance System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -81,14 +105,15 @@ LAYOUT_TEMPLATE = """
 </head>
 <body class="text-slate-200 min-h-screen flex">
 
+    {% if current_user.is_authenticated %}
     <aside class="w-72 bg-[#111827] border-r border-slate-800 flex flex-col fixed h-full z-20 transition-all duration-300">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
                 <i class="fa-solid fa-graduation-cap text-xl"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-wide">AuraAttend</h1>
-                <p class="text-xs text-slate-400 font-medium">Enterprise Management</p>
+                <h1 class="text-lg font-bold text-white tracking-wide">AIMCS</h1>
+                <p class="text-xs text-slate-400 font-medium">Attendance Management</p>
             </div>
         </div>
         
@@ -105,31 +130,40 @@ LAYOUT_TEMPLATE = """
             <a href="/analysis" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
                 <i class="fa-solid fa-chart-line text-base w-5"></i> Performance Report
             </a>
+            <a href="/profile" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
+                <i class="fa-solid fa-user-gear text-base w-5"></i> Security Settings
+            </a>
+            <a href="/logout" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-300">
+                <i class="fa-solid fa-right-from-bracket text-base w-5"></i> Terminate Session
+            </a>
         </nav>
 
         <div class="p-4 border-t border-slate-800">
             <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">A</div>
+                <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+                    {{ current_user.username[0].upper() }}
+                </div>
                 <div class="truncate">
-                    <p class="text-xs font-semibold text-white truncate">Administrator</p>
+                    <p class="text-xs font-semibold text-white truncate">{{ current_user.username }}</p>
                     <p class="text-[10px] text-slate-400 truncate">secure-session@active</p>
                 </div>
             </div>
         </div>
     </aside>
+    {% endif %}
 
-    <main class="flex-1 pl-72 min-h-screen flex flex-col">
+    <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col">
         <header class="h-20 bg-[#111827]/50 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-10">
             <div class="flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">System Node Status: Operational</p>
+                <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase">AIMCS Core Ingestion Node: Operational</p>
             </div>
             <div class="text-sm font-medium text-slate-300">
                 <i class="fa-regular fa-calendar-days mr-2 text-slate-400"></i> <span id="liveClock"></span>
             </div>
         </header>
 
-        <div class="p-8 flex-1">
+        <div class="p-8 flex-1 flex flex-col justify-start">
             {{ content | safe }}
         </div>
     </main>
@@ -146,8 +180,121 @@ LAYOUT_TEMPLATE = """
 </html>
 """
 
+# ================= LOGIN ROUTE =================
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+        
+    error_msg = ""
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute("SELECT id, username, password FROM admin_users WHERE username=?", (username,))
+        admin_data = c.fetchone()
+        conn.close()
+        
+        if admin_data and check_password_hash(admin_data[2], password):
+            userobj = User(admin_data[0], admin_data[1])
+            login_user(userobj)
+            return redirect(url_for("home"))
+        else:
+            error_msg = "Invalid systemic credential mappings."
+
+    content = f"""
+    <div class="max-w-md w-full mx-auto my-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl">
+        <div class="text-center space-y-2">
+            <div class="inline-flex p-3 bg-blue-500/10 text-blue-500 rounded-xl mb-2">
+                <i class="fa-solid fa-lock text-2xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">AIMCS Access Verification</h2>
+            <p class="text-xs text-slate-400">Provide root configuration deployment credentials.</p>
+        </div>
+        
+        {f'<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">{error_msg}</div>' if error_msg else ''}
+
+        <form method="POST" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Identified Username</label>
+                <input type="text" name="username" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="e.g. admin" required>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Secure Access Token (Password)</label>
+                <input type="password" name="password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all font-medium shadow-lg shadow-blue-500/10">
+                Authenticate Session
+            </button>
+        </form>
+        <div class="text-center text-[11px] text-slate-500 font-mono">
+            Default Configuration Target: admin / admin123
+        </div>
+    </div>
+    """
+    return render_template_string(LAYOUT_TEMPLATE, content=content)
+
+# ================= LOGOUT ROUTE =================
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+# ================= PROFILE/CHANGE PASSWORD =================
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    status_msg = ""
+    if request.method == "POST":
+        old_pass = request.form["old_password"]
+        new_pass = request.form["new_password"]
+        
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute("SELECT password FROM admin_users WHERE id=?", (current_user.id,))
+        current_pw_hash = c.fetchone()[0]
+        
+        if check_password_hash(current_pw_hash, old_pass):
+            new_hash = generate_password_hash(new_pass)
+            c.execute("UPDATE admin_users SET password=? WHERE id=?", (new_hash, current_user.id))
+            conn.commit()
+            status_msg = """<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl font-medium text-center">Cryptographic passphrase mutation complete.</div>"""
+        else:
+            status_msg = """<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">Root verification mismatch. Verification aborted.</div>"""
+        conn.close()
+
+    content = f"""
+    <div class="max-w-xl mx-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6">
+        <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Security & Encryption Administration</h2>
+            <p class="text-xs text-slate-400 mt-1">Alter configuration system access layers dynamically.</p>
+        </div>
+
+        {status_msg}
+
+        <form method="POST" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Current Passphrase</label>
+                <input type="password" name="old_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" required>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Core Target Passphrase</label>
+                <input type="password" name="new_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors" required>
+            </div>
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-blue-500/10">
+                Commit Cryptographic Changes
+            </button>
+        </form>
+    </div>
+    """
+    return render_template_string(LAYOUT_TEMPLATE, content=content)
+
 # ================= HOME =================
 @app.route("/")
+@login_required
 def home():
     content = """
     <div class="max-w-3xl mx-auto mt-12 text-center space-y-6">
@@ -155,10 +302,10 @@ def home():
             <i class="fa-solid fa-shield-halved text-5xl"></i>
         </div>
         <h2 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">
-            Next-Gen QR Attendance & Analytics
+            AIMCS Core Infrastructure
         </h2>
         <p class="text-lg text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Welcome to AuraAttend. Deploy instantaneous encrypted attendance records, automated student dispatch, and real-time biometric reporting workflows effortlessly.
+            Instantaneous encrypted attendance matrix tracking, structural analytical mapping, automated notification dispatches, and granular user lifecycle auditing workflows.
         </p>
         <div class="pt-4">
             <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.02]">
@@ -171,6 +318,7 @@ def home():
 
 # ================= DASHBOARD =================
 @app.route("/dashboard")
+@login_required
 def dashboard():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -187,7 +335,7 @@ def dashboard():
     <div class="space-y-8">
         <div>
             <h2 class="text-2xl font-bold text-white tracking-tight">System Overview</h2>
-            <p class="text-sm text-slate-400">Real-time environment metric evaluations.</p>
+            <p class="text-sm text-slate-400">AIMCS Environment real-time telemetry analytics calculations.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -245,6 +393,7 @@ def dashboard():
 
 # ================= BULK QR + EMAIL =================
 @app.route("/bulk", methods=["GET","POST"])
+@login_required
 def bulk():
     if request.method == "POST":
         start_time = request.form["start_time"]
@@ -308,9 +457,9 @@ def bulk():
             <div class="inline-flex p-4 bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/20 shadow-xl shadow-emerald-500/5">
                 <i class="fa-solid fa-circle-check text-4xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">QR Execution Completed Successfully</h2>
+            <h2 class="text-2xl font-bold text-white tracking-tight">AIMCS QR Generation Initiated</h2>
             <p class="text-slate-400 text-sm max-w-sm mx-auto">
-                Successfully processed and deployed records for <span class="text-white font-semibold">{success}</span> recipients. EmailJS communication dispatches are executing live in the browser background context.
+                Successfully configured dynamic targets for <span class="text-white font-semibold">{success}</span> recipients. Pipelines are processing background tasks via browser API contexts.
             </p>
 
             <script>
@@ -350,7 +499,7 @@ def bulk():
     <div class="max-w-3xl mx-auto bg-[#111827] border border-slate-800 rounded-2xl p-8 space-y-6">
         <div>
             <h2 class="text-xl font-bold text-white tracking-tight">Bulk Dispatch Architecture</h2>
-            <p class="text-xs text-slate-400 mt-1">Configure active tracking validation runtime parameters and recipients data schema mapping.</p>
+            <p class="text-xs text-slate-400 mt-1">Configure valid verification temporal windows and recipient structural array datasets mappings.</p>
         </div>
 
         <form method='POST' class="space-y-5">
@@ -380,18 +529,13 @@ def bulk():
 
 # ================= PERFORMANCE REPORT / ANALYSIS =================
 @app.route("/analysis")
+@login_required
 def analysis():
     conn = sqlite3.connect(DB_NAME)
-    
-    # Fetch chronological logs
     df_logs = pd.read_sql_query("SELECT * FROM attendance ORDER BY time DESC", conn)
-    
-    # Fetch tracking configurations
     df_config = pd.read_sql_query("SELECT name, start_time, end_time FROM students", conn)
-    
     conn.close()
 
-    # Dynamic Analysis Chart generation utilizing standard matplotlib backend
     chart_url = ""
     if not df_logs.empty:
         try:
@@ -424,7 +568,6 @@ def analysis():
         except Exception as e:
             print("Chart Engine Exception Log:", e)
 
-    # Convert logged metrics DataFrame directly into clean stylized semantic data rows
     table_rows = ""
     if not df_logs.empty:
         for idx, row in df_logs.iterrows():
@@ -439,7 +582,7 @@ def analysis():
     else:
         table_rows = """
         <tr>
-            <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500 font-medium">No real-time attendance validation check-ins stored within the current structural array matrix context.</td>
+            <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500 font-medium">No system check-ins captured within the relational ledger array.</td>
         </tr>
         """
 
@@ -447,27 +590,27 @@ def analysis():
     <div class="space-y-8">
         <div>
             <h2 class="text-2xl font-bold text-white tracking-tight">Analytical Metric Performance Reports</h2>
-            <p class="text-sm text-slate-400">Statistical breakdown metrics framework evaluations.</p>
+            <p class="text-sm text-slate-400">AIMCS statistical metrics computations framework.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 bg-[#111827] border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-center">
-                {f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Insufficient chronological matrix dataset parameters to compute live analytic projection charts.</div>'}
+                {f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Insufficient timeline allocation instances to draw live plot configurations.</div>'}
             </div>
             
             <div class="lg:col-span-2 bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Active Secure Allocation Nodes Table</h3>
+                <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Active Token Allocations Table</h3>
                 <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/50">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-800/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="px-6 py-3">Node ID</th>
-                                <th class="px-6 py-3">Student Name Target</th>
-                                <th class="px-6 py-3">Active Allocation Bounds (Start &rarr; Termination)</th>
+                                <th class="px-6 py-3">Mapping Instance</th>
+                                <th class="px-6 py-3">Identified Subject Target</th>
+                                <th class="px-6 py-3">Configured Temporal Allocation Bounds</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800/60 text-xs text-slate-300">
-                            {"".join([f'<tr class="hover:bg-slate-800/10"><td class="px-6 py-3 font-mono text-slate-500">#{i+1}</td><td class="px-6 py-3 font-medium text-white">{r["name"]}</td><td class="px-6 py-3 font-mono text-slate-400 text-[11px]">{r["start_time"]} &rarr; {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-6 py-6 text-center text-slate-500">Empty configuration matrix.</td></tr>'}
+                            {"".join([f'<tr class="hover:bg-slate-800/10"><td class="px-6 py-3 font-mono text-slate-500">#{i+1}</td><td class="px-6 py-3 font-medium text-white">{r["name"]}</td><td class="px-6 py-3 font-mono text-slate-400 text-[11px]">{r["start_time"]} &rarr; {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-6 py-6 text-center text-slate-500">Empty config structural dataset elements.</td></tr>'}
                         </tbody>
                     </table>
                 </div>
@@ -475,16 +618,16 @@ def analysis():
         </div>
 
         <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-            <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Real-Time Validation Log Ingestion Stream</h3>
+            <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Real-Time Ingestion Logs Stream</h3>
             <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/50">
                 <div class="max-h-96 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 bg-[#161f30] border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10">
                             <tr>
-                                <th class="px-6 py-3">Log ID</th>
-                                <th class="px-6 py-3">Identified Subject Entity</th>
-                                <th class="px-6 py-3">Ingestion Timestamp Record</th>
-                                <th class="px-6 py-3">Cryptographic Status</th>
+                                <th class="px-6 py-3">Ingestion Index</th>
+                                <th class="px-6 py-3">Validated Entity Target</th>
+                                <th class="px-6 py-3">System Timestamp Record</th>
+                                <th class="px-6 py-3">Cryptographic State</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -498,7 +641,7 @@ def analysis():
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= MARK ATTENDANCE =================
+# ================= MARK ATTENDANCE (PUBLIC SCAN NODE) =================
 @app.route("/mark/<token>")
 def mark(token):
     conn = sqlite3.connect(DB_NAME)
@@ -515,9 +658,9 @@ def mark(token):
     if not data:
         conn.close()
         return """
-        <div style="font-family:Arial,sans-serif; text-align:center; padding:50px; background:#0b0f19; min-h:100vh; color:white;">
-            <h2 style="color:#ef4444;">Invalid Cryptographic Token</h2>
-            <p style="color:#94a3b8;">The scanning node returned an unmapped sequence context.</p>
+        <div style="font-family:Arial,sans-serif; text-align:center; padding:50px; background:#0b0f19; min-height:100vh; color:white; box-sizing:border-box;">
+            <h2 style="color:#ef4444; margin-top:100px;">Invalid Cryptographic Token</h2>
+            <p style="color:#94a3b8;">The AIMCS scanning node returned an unmapped configuration sequence.</p>
         </div>
         """
 
@@ -525,7 +668,7 @@ def mark(token):
     start_time = data[1]
     end_time = data[2]
 
-    # Timezone calculation setup (+4 hours over UTC)
+    # Keeping your current timezone configuration (+4 hours over UTC)
     now = datetime.utcnow() + timedelta(hours=4)
 
     start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
@@ -536,9 +679,9 @@ def mark(token):
         return f"""
         <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
-                <div style="color:#ef4444; font-size:48px; margin-bottom:20px;"><i class="fa-solid fa-clock-lock"></i> 🛑</div>
+                <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">🛑</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Window Closed</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This attendance node tracking session has not reached initialized start verification timelines.</p>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This attendance tracking session has not reached initialized start verification timelines.</p>
                 <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#3b82f6;">
                     Target Runtime Start: {start_dt.strftime('%Y-%m-%d %H:%M')}
                 </div>
@@ -553,7 +696,7 @@ def mark(token):
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
                 <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">⚠️</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Link Terminated</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The processing window bounds for this entity target has fully closed.</p>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The temporal processing window bounds for this entity target has fully closed.</p>
                 <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#f43f5e;">
                     Terminated Runtime Bound: {end_dt.strftime('%Y-%m-%d %H:%M')}
                 </div>
@@ -575,7 +718,7 @@ def mark(token):
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
                 <div style="color:#f59e0b; font-size:48px; margin-bottom:20px;">🔁</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Sequence Redundancy</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely.</p>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely within the logging database bounds.</p>
                 <h3 style="color:#f59e0b; margin:0; font-size:18px;">{name} Already Logged</h3>
             </div>
         </div>
@@ -596,14 +739,15 @@ def mark(token):
         <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
             <div style="color:#10b981; font-size:48px; margin-bottom:20px;">✅</div>
             <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700; color:#10b981;">Ingestion Verified</h2>
-            <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the secure core file framework.</p>
+            <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the secure database array.</p>
             <h3 style="color:#ffffff; margin:0; font-size:20px; font-weight:600; border-top:1px solid #1e293b; padding-top:20px;">{name}</h3>
         </div>
     </div>
     """
 
-# ================= DOWNLOAD =================
+# ================= DOWNLOAD EXCEL =================
 @app.route("/download")
+@login_required
 def download():
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM attendance", conn)
@@ -614,8 +758,9 @@ def download():
 
     return send_file(file,as_attachment=True)
 
-# ================= QR ZIP =================
+# ================= QR ZIP ARCHIVE =================
 @app.route("/download_qrs")
+@login_required
 def zip_qr():
     z = zipfile.ZipFile("qrs.zip","w")
 
@@ -626,6 +771,6 @@ def zip_qr():
 
     return send_file("qrs.zip",as_attachment=True)
 
-# ================= RUN =================
+# ================= RUN ENGINE =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
