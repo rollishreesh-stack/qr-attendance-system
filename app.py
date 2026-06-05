@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, send_file, render_template_string, url_for, flash
+from flask import Flask, request, redirect, send_file, render_template_string, url_for, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
@@ -10,7 +10,7 @@ import zipfile
 import pandas as pd
 import io
 import matplotlib
-matplotlib.use('Agg')  # Prevents GUI compilation issues on hosting platforms
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
@@ -108,7 +108,6 @@ LAYOUT_TEMPLATE = """
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Continuous High-Performance Typography Stream Animations */
         @keyframes streamLeft {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-50%, 0, 0); }
@@ -136,7 +135,6 @@ LAYOUT_TEMPLATE = """
             50% { opacity: 0.3; transform: scale(1.02); }
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -148,39 +146,46 @@ LAYOUT_TEMPLATE = """
             background: #1e293b;
             border-radius: 10px;
         }
+        
+        /* Custom overrides for the html5-qrcode scanner UI to match dark theme */
+        #reader { border: none !important; }
+        #reader__dashboard_section_csr button {
+            background-color: #f59e0b !important;
+            color: #030712 !important;
+            border: none !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            margin: 10px 0 !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+        #reader__dashboard_section_swaplink { color: #f59e0b !important; text-decoration: none !important; }
+        #reader__scan_region { background: #0b0f19 !important; border-radius: 12px; overflow: hidden; }
     </style>
 </head>
 <body class="text-slate-300 min-h-screen flex overflow-x-hidden relative">
 
     <!-- GLOBAL IMMERSIVE "MOTION PICTURE" BACKGROUND CANVAS -->
-    <!-- Opacity significantly increased, colors shifted to Premium Gold/Amber -->
     <div class="fixed inset-0 w-screen h-screen pointer-events-none select-none overflow-hidden z-0 flex flex-col justify-between py-8 opacity-40">
-        
-        <!-- Moving Track 1 (Solid Gold) -->
         <div class="w-full overflow-hidden whitespace-nowrap text-[8.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/30">
             <div class="kinetic-track-left">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
-        
-        <!-- Moving Track 2 (Outline Aesthetic - Bright Amber) -->
         <div class="w-full overflow-hidden whitespace-nowrap text-[11rem] font-bold font-outfit uppercase tracking-[2.5rem] text-transparent" style="-webkit-text-stroke: 2px rgba(245, 158, 11, 0.4);">
             <div class="kinetic-track-right">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
-
-        <!-- Moving Track 3 (Outline Aesthetic - Subtle Yellow) -->
         <div class="w-full overflow-hidden whitespace-nowrap text-[7rem] font-black font-outfit uppercase tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(251, 191, 36, 0.3);">
             <div class="kinetic-track-left">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
             </div>
         </div>
-
-        <!-- Moving Track 4 (Solid Gold) -->
         <div class="w-full overflow-hidden whitespace-nowrap text-[9.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/20">
             <div class="kinetic-track-right">
                 <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
@@ -208,6 +213,10 @@ LAYOUT_TEMPLATE = """
             </a>
             <a href="/dashboard" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-chart-pie text-base w-5 text-slate-500"></i> Dashboard
+            </a>
+            <!-- NEW: Live Scanner Nav Link -->
+            <a href="/scanner" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                <i class="fa-solid fa-camera-viewfinder text-base w-5 text-amber-500"></i> Live Scanner Kiosk
             </a>
             <a href="/bulk" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-qrcode text-base w-5 text-slate-500"></i> Create QR Codes
@@ -237,7 +246,6 @@ LAYOUT_TEMPLATE = """
     </aside>
     {% endif %}
 
-    <!-- Core Content App Layout -->
     <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative z-10">
         <header id="mainHeader" class="h-20 bg-[#030712]/60 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-2">
@@ -265,6 +273,141 @@ LAYOUT_TEMPLATE = """
 </body>
 </html>
 """
+
+# ================= LIVE SCANNER CONTINUOUS TAP KIOSK =================
+@app.route("/scanner")
+@login_required
+def scanner():
+    content = """
+    <div class="max-w-2xl mx-auto space-y-6 w-full">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-white tracking-tight font-outfit">Live Kiosk Scanner</h2>
+            <p class="text-sm text-slate-400 mt-1">Point a student's QR code at the camera. It scans instantly like NFC.</p>
+        </div>
+        
+        <div class="bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)] relative">
+            
+            <!-- Target Overlay aesthetic -->
+            <div class="absolute inset-0 border-2 border-amber-500/20 rounded-2xl m-6 pointer-events-none z-10">
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-amber-500"></div>
+                <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-amber-500"></div>
+                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-500"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-500"></div>
+            </div>
+
+            <!-- The Camera Container -->
+            <div id="reader" class="w-full rounded-xl overflow-hidden relative z-0 min-h-[300px] flex items-center justify-center bg-slate-900"></div>
+            
+            <!-- Result Toast Notification -->
+            <div id="scanResult" class="hidden mt-4 p-4 rounded-xl text-center font-bold text-sm shadow-md transition-all duration-300"></div>
+        </div>
+
+        <script src="https://unpkg.com/html5-qrcode"></script>
+        <script>
+            let html5QrcodeScanner;
+            
+            function onScanSuccess(decodedText, decodedResult) {
+                // Pause the scanner to prevent double-scanning the same code rapidly
+                html5QrcodeScanner.pause();
+                
+                // Extract token from URL
+                let token = '';
+                try {
+                    token = decodedText.split('/mark/')[1];
+                } catch(e) {}
+
+                if (!token) {
+                    showResult("Unrecognized QR Code Format", "error");
+                    setTimeout(() => html5QrcodeScanner.resume(), 2500);
+                    return;
+                }
+
+                // Call the background API
+                fetch('/api/mark/' + token)
+                    .then(res => res.json())
+                    .then(data => {
+                        showResult(data.message, data.status);
+                        // Resume scanning after 2.5 seconds automatically
+                        setTimeout(() => {
+                            document.getElementById('scanResult').classList.add('hidden');
+                            html5QrcodeScanner.resume();
+                        }, 2500); 
+                    })
+                    .catch(err => {
+                        showResult("Network Transmission Error", "error");
+                        setTimeout(() => html5QrcodeScanner.resume(), 2500);
+                    });
+            }
+
+            function showResult(msg, type) {
+                const resDiv = document.getElementById('scanResult');
+                resDiv.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'bg-rose-500/10', 'text-rose-400', 'bg-amber-500/10', 'text-amber-400', 'border-emerald-500/20', 'border-rose-500/20', 'border-amber-500/20');
+                
+                if (type === 'success') {
+                    resDiv.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-circle-check text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
+                } else if (type === 'error') {
+                    resDiv.classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-circle-xmark text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
+                } else {
+                    resDiv.classList.add('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader",
+                    { fps: 15, qrbox: {width: 250, height: 250} },
+                    false);
+                html5QrcodeScanner.render(onScanSuccess);
+            });
+        </script>
+    </div>
+    """
+    return render_template_string(LAYOUT_TEMPLATE, content=content)
+
+# ================= BACKGROUND API FOR CONTINUOUS SCANNING =================
+@app.route("/api/mark/<token>")
+def api_mark(token):
+    """
+    Silent background endpoint used by the Live Scanner to quickly tap-and-go 
+    without redirecting the admin away from the camera feed.
+    """
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    c.execute("SELECT name,start_time,end_time FROM students WHERE token=?", (token,))
+    data = c.fetchone()
+
+    if not data:
+        conn.close()
+        return jsonify({"status": "error", "message": "Invalid Link Identifier"})
+
+    name, start_time, end_time = data
+    now = datetime.utcnow() + timedelta(hours=4)
+    start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
+    end_dt = datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
+
+    if now < start_dt:
+        conn.close()
+        return jsonify({"status": "warning", "message": f"Sealed: {name} (Starts {start_time})"})
+
+    if now > end_dt:
+        conn.close()
+        return jsonify({"status": "error", "message": f"Expired: {name}"})
+
+    c.execute("SELECT * FROM attendance WHERE name=? AND date(time)=date('now','+4 hours')", (name,))
+    if c.fetchone():
+        conn.close()
+        return jsonify({"status": "warning", "message": f"Already Logged: {name}"})
+
+    time_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)", (name,time_str))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"status": "success", "message": f"Verified: {name}"})
 
 # ================= LOGIN ROUTE =================
 @app.route("/login", methods=["GET", "POST"])
@@ -315,14 +458,11 @@ def login():
                 Sign In
             </button>
         </form>
-        <div class="text-center text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-900">
-            Default Credentials: admin / admin123
-        </div>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= FIXED LOGOUT ROUTE =================
+# ================= LOGOUT ROUTE =================
 @app.route("/logout")
 @login_required
 def logout():
@@ -356,7 +496,6 @@ def profile():
     <div class="max-w-xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 space-y-6 shadow-xl">
         <div class="border-b border-slate-800 pb-3">
             <h2 class="text-xl font-bold text-white tracking-tight font-outfit">Change Password</h2>
-            <p class="text-xs text-slate-400 mt-1">Update your administrative secure key credentials here.</p>
         </div>
 
         {status_msg}
@@ -385,8 +524,6 @@ def home():
     content = """
     <div class="w-full max-w-4xl mx-auto mt-12">
         <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-md shadow-[0_0_50px_-15px_rgba(245,158,11,0.1)] p-12 md:p-16">
-            
-            <!-- AIMCS Internal Panel Gold Motion Canvas -->
             <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-30 flex flex-col justify-between py-6 z-0">
                 <div class="w-full overflow-hidden whitespace-nowrap">
                     <div class="kinetic-track-left text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(245, 158, 11, 0.4);">
@@ -407,7 +544,6 @@ def home():
                 </div>
             </div>
 
-            <!-- Deep Ambient Gradient Layer -->
             <div class="absolute inset-0 bg-gradient-to-r from-[#0b0f19] via-[#0b0f19]/80 to-transparent z-10"></div>
 
             <div class="relative z-20 max-w-xl space-y-5">
@@ -421,12 +557,15 @@ def home():
                 </div>
                 
                 <p class="text-sm text-slate-300 leading-relaxed font-light border-l border-amber-500/50 pl-4">
-                    Generate temporary tokenized QR codes, stream real-time logs, verify security stamps, and export consolidated analytical charts over a fluid typographic interface workspace.
+                    Generate temporary tokenized QR codes, stream real-time logs, verify security stamps, and launch the Live Kiosk Scanner to rapidly scan students like an NFC tap.
                 </p>
                 
-                <div class="pt-2">
+                <div class="pt-2 flex gap-3">
                     <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] text-xs font-bold rounded-xl transition-all border border-amber-400 shadow-md">
                         Open Dashboard Portal <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                    <a href="/scanner" class="inline-flex items-center justify-center px-6 py-3 bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-bold rounded-xl transition-all border border-slate-700 shadow-md">
+                        <i class="fa-solid fa-camera mr-2 text-xs"></i> Launch Live Scanner
                     </a>
                 </div>
             </div>
@@ -488,7 +627,11 @@ def dashboard():
 
         <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-md">
             <h3 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider font-outfit">Management Actions</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <a href="/scanner" class="flex flex-col items-center justify-center p-5 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 rounded-xl border border-amber-500/40 text-center group transition-all">
+                    <i class="fa-solid fa-camera-viewfinder text-xl text-amber-500 mb-2 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white transition-colors">Open Scanner Kiosk</span>
+                </a>
                 <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
                     <i class="fa-solid fa-qrcode text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
                     <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Create QR Codes</span>
@@ -499,7 +642,7 @@ def dashboard():
                 </a>
                 <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
                     <i class="fa-solid fa-file-zipper text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
-                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Download All QRs (.zip)</span>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Download All QRs</span>
                 </a>
             </div>
         </div>
@@ -656,7 +799,6 @@ def analysis():
             ax.set_facecolor('#0b0f19')
             ax.patch.set_alpha(0.0)
             
-            # Using Amber color for the chart to match the new theme
             attendance_counts.plot(kind='bar', color='#f59e0b', width=0.35, ax=ax)
             
             ax.tick_params(colors='#94a3b8', labelsize=8)
@@ -751,7 +893,7 @@ def analysis():
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= PUBLIC MARK ATTENDANCE SCREEN =================
+# ================= PUBLIC MARK ATTENDANCE SCREEN (FOR STUDENTS) =================
 @app.route("/mark/<token>")
 def mark(token):
     conn = sqlite3.connect(DB_NAME)
