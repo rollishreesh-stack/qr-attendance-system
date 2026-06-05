@@ -9,9 +9,16 @@ import os
 import zipfile
 import pandas as pd
 import io
-import matplotlib
-matplotlib.use('Agg')  # Strictly intercepts graphical UI hooks to prevent hosting startup crashes
-import matplotlib.pyplot as plt
+
+# Safe Graphing Engine Ingestion Switch
+CHARTS_ENABLED = True
+try:
+    import matplotlib
+    matplotlib.use('Agg')  # Intercepts graphical UI hooks for cloud hosting
+    import matplotlib.pyplot as plt
+except Exception as e:
+    print("SYSTEM NOTICE: Server environment lacks graphical drivers. Disabling analytics chart layer safely.")
+    CHARTS_ENABLED = False
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -23,7 +30,6 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    # Admin Table Structure
     c.execute("""
     CREATE TABLE IF NOT EXISTS admin_users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +38,6 @@ def init_db():
     )
     """)
 
-    # Student Table Structure
     c.execute("""
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +49,6 @@ def init_db():
     )
     """)
 
-    # Attendance Records Table Structure
     c.execute("""
     CREATE TABLE IF NOT EXISTS attendance (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,14 +57,12 @@ def init_db():
     )
     """)
 
-    # --- EXECUTIVE INDEX PERFORMANCE OPTIMIZATIONS ---
     try:
         c.execute("CREATE INDEX IF NOT EXISTS idx_students_token ON students(token)")
         c.execute("CREATE INDEX IF NOT EXISTS idx_attendance_name_time ON attendance(name, time)")
     except Exception as e:
-        print("Performance indexing tracking notice:", e)
+        print("Performance indexing notice:", e)
 
-    # Setup default admin account if table is empty (User: admin / Pass: admin123)
     c.execute("SELECT COUNT(*) FROM admin_users")
     if c.fetchone()[0] == 0:
         hashed_pw = generate_password_hash("admin123")
@@ -242,9 +244,6 @@ def login():
                 Establish Connection Node
             </button>
         </form>
-        <div class="text-center text-[10px] text-slate-500 font-mono">
-            FACTORY ENCRYPT SYSTEM DEFAULTS: admin / admin123
-        </div>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
@@ -335,13 +334,10 @@ def home():
 def dashboard():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
     c.execute("SELECT COUNT(*) FROM students")
     students = c.fetchone()[0]
-
     c.execute("SELECT COUNT(*) FROM attendance")
     attendance = c.fetchone()[0]
-
     conn.close()
 
     content = f"""
@@ -441,7 +437,6 @@ def bulk():
 
         conn = sqlite3.connect(DB_NAME)
         c = conn.cursor()
-
         os.makedirs("static/qrs", exist_ok=True)
 
         success = 0
@@ -450,7 +445,6 @@ def bulk():
         for line in lines:
             try:
                 line = line.strip()
-
                 if not line or "," not in line:
                     continue
 
@@ -460,34 +454,25 @@ def bulk():
 
                 token = secrets.token_hex(8)
 
-                # save in DB
                 c.execute("""
                 INSERT INTO students (name,email,token,start_time,end_time)
                 VALUES (?,?,?,?,?)
                 """, (name, email, token, start_time, end_time))
 
-                # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
-
-                # ✅ ONLINE QR IMAGE
                 qr_image_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + qr_link
 
-                # optional local save (for download zip later)
                 img = qrcode.make(qr_link)
                 file_path = f"static/qrs/{name.replace(' ','_')}.png"
                 img.save(file_path)
 
-                # send to emailjs
                 js_students.append(f"{name},{email},{qr_link},{qr_image_url}")
-
                 success += 1
-
             except Exception as e:
                 print("ERROR:", e)
 
         conn.commit()
         conn.close()
-
         js_data = "\n".join(js_students)
 
         content = f"""
@@ -502,25 +487,15 @@ def bulk():
 
             <script>
             const students = `{js_data}`.trim().split('\\n');
-
             students.forEach(s => {{
                 let p = s.split(",");
                 if (p.length < 4) return;
-                let name = p[0];
-                let email = p[1];
-                let link = p[2];
-                let qr_image = p[3];
-
-                emailjs.send(
-                    "service_iuneir8",
-                    "template_uyhe7xo",
-                    {{
-                        name: name,
-                        email: email,
-                        qr_link: link,
-                        qr_image: qr_image
-                    }}
-                );
+                emailjs.send("service_iuneir8", "template_uyhe7xo", {{
+                    name: p[0],
+                    email: p[1],
+                    qr_link: p[2],
+                    qr_image: p[3]
+                }});
             }});
             </script>
 
@@ -575,7 +550,7 @@ def analysis():
     conn.close()
 
     chart_url = ""
-    if not df_logs.empty:
+    if CHARTS_ENABLED and not df_logs.empty:
         try:
             df_logs['date_only'] = df_logs['time'].apply(lambda x: x.split()[0] if x else '')
             attendance_counts = df_logs.groupby('date_only').size()
@@ -586,7 +561,6 @@ def analysis():
             ax.set_facecolor('#0f1524')
             
             attendance_counts.plot(kind='bar', color='#2563eb', edgecolor='#3b82f6', width=0.4, ax=ax)
-            
             ax.tick_params(colors='white', labelsize=8)
             ax.spines['bottom'].set_color('#1e293b')
             ax.spines['left'].set_color('#1e293b')
@@ -604,7 +578,7 @@ def analysis():
             chart_url = "data:image/png;base64," + base64.b64encode(img_buf.getvalue()).decode('utf-8')
             plt.close()
         except Exception as e:
-            print("Chart Engine Exception Log:", e)
+            print("Chart Engine Runtime Handle:", e)
 
     table_rows = ""
     if not df_logs.empty:
@@ -628,6 +602,11 @@ def analysis():
 
     today_iso = (datetime.utcnow() + timedelta(hours=4)).strftime("%Y-%m-%d")
 
+    # If charting is systematically disabled on the cloud machine, render a placeholder card
+    chart_render = f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Data visualization layer active. Awaiting log profiles.</div>'
+    if not CHARTS_ENABLED:
+        chart_render = '<div class="text-slate-400 text-xs text-center py-12 font-semibold uppercase tracking-wider bg-slate-900/40 rounded-xl p-4 border border-slate-800/40"><i class="fa-solid fa-triangle-exclamation text-amber-500 block text-lg mb-2"></i> Cloud Core Mode Active.<br><span class="text-[10px] text-slate-500 mt-1 block">Tabular lists processing natively.</span></div>'
+
     content = f"""
     <div class="space-y-8">
         <div>
@@ -641,7 +620,7 @@ def analysis():
                     <i class="fa-solid fa-chart-bar text-blue-400 text-xs"></i>
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Statistical Graph View</span>
                 </div>
-                {f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Insufficient data profiles mapped to compute chart configurations.</div>'}
+                {chart_render}
             </div>
             
             <div class="lg:col-span-2 bg-[#0f1524] border border-slate-800/60 rounded-2xl p-6 space-y-4 shadow-xl">
@@ -757,13 +736,7 @@ def analysis():
 def mark(token):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
-    c.execute("""
-    SELECT name,start_time,end_time
-    FROM students
-    WHERE token=?
-    """, (token,))
-
+    c.execute("SELECT name,start_time,end_time FROM students WHERE token=?", (token,))
     data = c.fetchone()
 
     if not data:
@@ -775,12 +748,8 @@ def mark(token):
         </div>
         """
 
-    name = data[0]
-    start_time = data[1]
-    end_time = data[2]
-
+    name, start_time, end_time = data[0], data[1], data[2]
     now = datetime.utcnow() + timedelta(hours=4)
-
     start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
     end_dt = datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
 
@@ -791,10 +760,8 @@ def mark(token):
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
                 <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">🛑</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Window Closed</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This attendance tracking session has not reached initialized start verification timelines.</p>
-                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#3b82f6;">
-                    Target Runtime Start: {start_dt.strftime('%Y-%m-%d %H:%M')}
-                </div>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This tracking session has not reached initialized start timelines.</p>
+                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#3b82f6;">Target Start: {start_dt.strftime('%Y-%m-%d %H:%M')}</div>
             </div>
         </div>
         """
@@ -806,21 +773,13 @@ def mark(token):
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
                 <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">⚠️</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Link Terminated</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The temporal processing window bounds for this entity target has fully closed.</p>
-                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#f43f5e;">
-                    Terminated Runtime Bound: {end_dt.strftime('%Y-%m-%d %H:%M')}
-                </div>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The processing window bounds for this entity target has fully closed.</p>
+                <div style="background-color:#1e293b; padding:15px; border-radius:12px; font-family:monospace; font-size:13px; color:#f43f5e;">Terminated Bound: {end_dt.strftime('%Y-%m-%d %H:%M')}</div>
             </div>
         </div>
         """
 
-    c.execute("""
-    SELECT *
-    FROM attendance
-    WHERE name=?
-    AND date(time)=date('now','+4 hours')
-    """, (name,))
-
+    c.execute("SELECT * FROM attendance WHERE name=? AND date(time)=date('now','+4 hours')", (name,))
     if c.fetchone():
         conn.close()
         return f"""
@@ -828,19 +787,14 @@ def mark(token):
             <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
                 <div style="color:#f59e0b; font-size:48px; margin-bottom:20px;">🔁</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Sequence Redundancy</h2>
-                <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely within the logging database bounds.</p>
+                <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely.</p>
                 <h3 style="color:#f59e0b; margin:0; font-size:18px;">{name} Already Logged</h3>
             </div>
         </div>
         """
 
     time_str = now.strftime("%Y-%m-%d %H:%M:%S")
-
-    c.execute("""
-    INSERT INTO attendance(name,time)
-    VALUES (?,?)
-    """, (name,time_str))
-
+    c.execute("INSERT INTO attendance(name,time) VALUES (?,?)", (name,time_str))
     conn.commit()
     conn.close()
 
@@ -849,7 +803,7 @@ def mark(token):
         <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
             <div style="color:#10b981; font-size:48px; margin-bottom:20px;">✅</div>
             <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700; color:#10b981;">Ingestion Verified</h2>
-            <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the secure database array.</p>
+            <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the database array.</p>
             <h3 style="color:#ffffff; margin:0; font-size:20px; font-weight:600; border-top:1px solid #1e293b; padding-top:20px;">{name}</h3>
         </div>
     </div>
@@ -862,10 +816,8 @@ def download():
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM attendance", conn)
     conn.close()
-
     file = "attendance.xlsx"
     df.to_excel(file,index=False)
-
     return send_file(file,as_attachment=True)
 
 # ================= QR ZIP ARCHIVE =================
@@ -873,12 +825,10 @@ def download():
 @login_required
 def zip_qr():
     z = zipfile.ZipFile("qrs.zip","w")
-
     if os.path.exists("static/qrs"):
         for f in os.listdir("static/qrs"):
             z.write("static/qrs/"+f)
     z.close()
-
     return send_file("qrs.zip",as_attachment=True)
 
 # ================= RUN ENGINE =================
