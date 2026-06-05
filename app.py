@@ -10,7 +10,7 @@ import zipfile
 import pandas as pd
 import io
 import matplotlib
-matplotlib.use('Agg')  # Prevents GUI compilation issues on Render
+matplotlib.use('Agg')  # Strictly intercepts graphical UI hooks to prevent hosting startup crashes
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
@@ -54,8 +54,11 @@ def init_db():
     """)
 
     # --- EXECUTIVE INDEX PERFORMANCE OPTIMIZATIONS ---
-    c.execute("CREATE INDEX IF NOT EXISTS idx_students_token ON students(token)")
-    c.execute("CREATE INDEX IF NOT EXISTS idx_attendance_name_time ON attendance(name, time)")
+    try:
+        c.execute("CREATE INDEX IF NOT EXISTS idx_students_token ON students(token)")
+        c.execute("CREATE INDEX IF NOT EXISTS idx_attendance_name_time ON attendance(name, time)")
+    except Exception as e:
+        print("Performance indexing tracking notice:", e)
 
     # Setup default admin account if table is empty (User: admin / Pass: admin123)
     c.execute("SELECT COUNT(*) FROM admin_users")
@@ -466,7 +469,7 @@ def bulk():
                 # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
 
-                # ✅ ONLINE QR IMAGE (IMPORTANT FIX)
+                # ✅ ONLINE QR IMAGE
                 qr_image_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + qr_link
 
                 # optional local save (for download zip later)
@@ -623,7 +626,6 @@ def analysis():
         </tr>
         """
 
-    # Computing standard client-side date markers
     today_iso = (datetime.utcnow() + timedelta(hours=4)).strftime("%Y-%m-%d")
 
     content = f"""
@@ -777,7 +779,6 @@ def mark(token):
     start_time = data[1]
     end_time = data[2]
 
-    # Keeping your current timezone configuration (+4 hours over UTC)
     now = datetime.utcnow() + timedelta(hours=4)
 
     start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
