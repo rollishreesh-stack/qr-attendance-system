@@ -18,16 +18,16 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-c.execute("""
-CREATE TABLE IF NOT EXISTS students (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
-    token TEXT UNIQUE,
-    start_time TEXT,
-    end_time TEXT
-)
-""")
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        token TEXT UNIQUE,
+        start_time TEXT,
+        end_time TEXT
+    )
+    """)
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS attendance (
@@ -96,13 +96,31 @@ button{
     color:white;
     border:none;
     border-radius:10px;
+    cursor:pointer;
 }
 
 textarea{
     width:100%;
-    height:200px;
+    height:150px;
     padding:10px;
     border-radius:10px;
+    margin-bottom:15px;
+    box-sizing: border-box;
+}
+
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .stats{
@@ -119,7 +137,6 @@ textarea{
 }
 </style>
 
-<!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <script>
@@ -147,7 +164,6 @@ def home():
 # ================= DASHBOARD =================
 @app.route("/dashboard")
 def dashboard():
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
@@ -182,11 +198,9 @@ def dashboard():
 # ================= BULK QR + EMAIL =================
 @app.route("/bulk", methods=["GET","POST"])
 def bulk():
-
     if request.method == "POST":
         start_time = request.form["start_time"]
-end_time = request.form["end_time"]
-
+        end_time = request.form["end_time"]
         data = request.form["data"]
         lines = data.strip().split("\n")
 
@@ -199,7 +213,6 @@ end_time = request.form["end_time"]
         js_students = []
 
         for line in lines:
-
             try:
                 line = line.strip()
 
@@ -213,17 +226,10 @@ end_time = request.form["end_time"]
                 token = secrets.token_hex(8)
 
                 # save in DB
-               c.execute("""
-INSERT INTO students
-(name,email,token,start_time,end_time)
-VALUES (?,?,?,?,?)
-""", (
-    name,
-    email,
-    token,
-    start_time,
-    end_time
-))
+                c.execute("""
+                INSERT INTO students (name,email,token,start_time,end_time)
+                VALUES (?,?,?,?,?)
+                """, (name, email, token, start_time, end_time))
 
                 # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
@@ -265,6 +271,7 @@ VALUES (?,?,?,?,?)
 
                 students.forEach(s => {{
                     let p = s.split(",");
+                    if (p.length < 4) return;
                     let name = p[0];
                     let email = p[1];
                     let link = p[2];
@@ -298,12 +305,17 @@ VALUES (?,?,?,?,?)
 
     <div class='container'>
         <div class='card'>
-            <h3>Format:</h3>
-            <p>Name,Email</p>
-
             <form method='POST'>
-                <textarea name='data'></textarea>
-                <button>Generate QR</button>
+                <label for='start_time'>Attendance Window Start Time:</label>
+                <input type='datetime-local' name='start_time' id='start_time' required>
+
+                <label for='end_time'>Attendance Window End Time:</label>
+                <input type='datetime-local' name='end_time' id='end_time' required>
+
+                <label for='data'>Student List (Format: Name,Email):</label>
+                <textarea name='data' id='data' placeholder='John Doe, john@example.com&#10;Jane Doe, jane@example.com' required></textarea>
+                
+                <button type='submit'>Generate QR</button>
             </form>
         </div>
     </div>
@@ -312,7 +324,6 @@ VALUES (?,?,?,?,?)
 # ================= MARK ATTENDANCE =================
 @app.route("/mark/<token>")
 def mark(token):
-
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
@@ -332,41 +343,29 @@ def mark(token):
     start_time = data[1]
     end_time = data[2]
 
+    # Keeping your current timezone configuration (+4 hours over UTC)
     now = datetime.utcnow() + timedelta(hours=4)
 
-    start_dt = datetime.strptime(
-        start_time,
-        "%Y-%m-%dT%H:%M"
-    )
-
-    end_dt = datetime.strptime(
-        end_time,
-        "%Y-%m-%dT%H:%M"
-    )
+    start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
+    end_dt = datetime.strptime(end_time, "%Y-%m-%dT%H:%M")
 
     if now < start_dt:
-
         conn.close()
-
         return f"""
-        <h2 style='color:red;text-align:center'>
+        <h2 style='color:red;text-align:center;font-family:Arial;'>
         Attendance has not started yet
         <br><br>
-        Start Time:
-        {start_dt}
+        Start Time: {start_dt.strftime('%Y-%m-%d %H:%M')}
         </h2>
         """
 
     if now > end_dt:
-
         conn.close()
-
         return f"""
-        <h2 style='color:red;text-align:center'>
+        <h2 style='color:red;text-align:center;font-family:Arial;'>
         Attendance Closed
         <br><br>
-        End Time:
-        {end_dt}
+        End Time: {end_dt.strftime('%Y-%m-%d %H:%M')}
         </h2>
         """
 
@@ -378,12 +377,10 @@ def mark(token):
     """, (name,))
 
     if c.fetchone():
-
         conn.close()
-
         return f"""
-        <h2>
-        {name} already marked
+        <h2 style='text-align:center;font-family:Arial;color:orange;'>
+        {name} already marked for today
         </h2>
         """
 
@@ -398,7 +395,7 @@ def mark(token):
     conn.close()
 
     return f"""
-    <h1 style='text-align:center;color:green'>
+    <h1 style='text-align:center;color:green;font-family:Arial;'>
     Attendance Marked Successfully
     <br><br>
     {name}
@@ -408,9 +405,9 @@ def mark(token):
 # ================= DOWNLOAD =================
 @app.route("/download")
 def download():
-
     conn = sqlite3.connect(DB_NAME)
     df = pd.read_sql_query("SELECT * FROM attendance", conn)
+    conn.close()
 
     file = "attendance.xlsx"
     df.to_excel(file,index=False)
@@ -420,12 +417,11 @@ def download():
 # ================= QR ZIP =================
 @app.route("/download_qrs")
 def zip_qr():
-
     z = zipfile.ZipFile("qrs.zip","w")
 
-    for f in os.listdir("static/qrs"):
-        z.write("static/qrs/"+f)
-
+    if os.path.exists("static/qrs"):
+        for f in os.listdir("static/qrs"):
+            z.write("static/qrs/"+f)
     z.close()
 
     return send_file("qrs.zip",as_attachment=True)
