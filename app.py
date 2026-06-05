@@ -1,24 +1,33 @@
+import os
+import sys
+import sqlite3
+import secrets
+import qrcode
+import zipfile
+import io
+from datetime import datetime, timedelta
+
 from flask import Flask, request, redirect, send_file, render_template_string, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
-from datetime import datetime, timedelta
-import secrets
-import qrcode
-import os
-import zipfile
 import pandas as pd
-import io
 
-# Safe Graphing Engine Ingestion Switch
+# ================= SAFE GRAPHING ENGINE CONTEXT =================
+# We wrap this cleanly so Python gets its exact expected try/except structure
 CHARTS_ENABLED = True
 try:
     import matplotlib
-matplotlib.use('Agg')  # Forces background rendering (fixes headless server crashes) 
+    matplotlib.use('Agg')  # Strictly configures headless background rendering
     import matplotlib.pyplot as plt
 except Exception as e:
     print("SYSTEM NOTICE: Server environment lacks graphical drivers. Disabling analytics chart layer safely.")
     CHARTS_ENABLED = False
+
+# ================= APP INITIALIZATION =================
+app = Flask(__name__)
+app.secret_key = "supersecretkey"
+
+DB_NAME = "attendance.db"
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
