@@ -14,7 +14,7 @@ import io
 CHARTS_ENABLED = True
 try:
     import matplotlib
-    matplotlib.use('Agg')  # Intercepts graphical UI hooks for cloud hosting
+    matplotlib.use('Agg')  
     import matplotlib.pyplot as plt
 except Exception as e:
     print("SYSTEM NOTICE: Server environment lacks graphical drivers. Disabling analytics chart layer safely.")
@@ -602,7 +602,6 @@ def analysis():
 
     today_iso = (datetime.utcnow() + timedelta(hours=4)).strftime("%Y-%m-%d")
 
-    # If charting is systematically disabled on the cloud machine, render a placeholder card
     chart_render = f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Data visualization layer active. Awaiting log profiles.</div>'
     if not CHARTS_ENABLED:
         chart_render = '<div class="text-slate-400 text-xs text-center py-12 font-semibold uppercase tracking-wider bg-slate-900/40 rounded-xl p-4 border border-slate-800/40"><i class="fa-solid fa-triangle-exclamation text-amber-500 block text-lg mb-2"></i> Cloud Core Mode Active.<br><span class="text-[10px] text-slate-500 mt-1 block">Tabular lists processing natively.</span></div>'
@@ -757,7 +756,7 @@ def mark(token):
         conn.close()
         return f"""
         <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
+            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.35)">
                 <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">🛑</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Window Closed</h2>
                 <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">This tracking session has not reached initialized start timelines.</p>
@@ -770,7 +769,7 @@ def mark(token):
         conn.close()
         return f"""
         <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
+            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.35)">
                 <div style="color:#ef4444; font-size:48px; margin-bottom:20px;">⚠️</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Validation Link Terminated</h2>
                 <p style="color:#94a3b8; font-size:14px; margin:0 0 24px 0;">The processing window bounds for this entity target has fully closed.</p>
@@ -784,7 +783,7 @@ def mark(token):
         conn.close()
         return f"""
         <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
+            <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.35)">
                 <div style="color:#f59e0b; font-size:48px; margin-bottom:20px;">🔁</div>
                 <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700;">Sequence Redundancy</h2>
                 <p style="color:#94a3b8; font-size:14px; margin:0 0 10px 0;">Entity ingestion already processed securely.</p>
@@ -800,7 +799,7 @@ def mark(token):
 
     return f"""
     <div style="font-family:Arial,sans-serif; text-align:center; padding:100px 20px; background-color:#0b0f19; color:#f8fafc; min-height:100vh; box-sizing:border-box;">
-        <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.3)">
+        <div style="max-width:500px; margin:0 auto; background-color:#111827; border:1px solid #1e293b; padding:40px; border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.35)">
             <div style="color:#10b981; font-size:48px; margin-bottom:20px;">✅</div>
             <h2 style="margin:0 0 10px 0; font-size:24px; font-weight:700; color:#10b981;">Ingestion Verified</h2>
             <p style="color:#94a3b8; font-size:14px; margin:0 0 20px 0;">Attendance successfully saved inside the database array.</p>
@@ -833,4 +832,5 @@ def zip_qr():
 
 # ================= RUN ENGINE =================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
