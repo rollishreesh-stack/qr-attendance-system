@@ -101,6 +101,9 @@ LAYOUT_TEMPLATE = """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0b0f19; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="text-slate-200 min-h-screen flex">
@@ -333,13 +336,20 @@ def dashboard():
 
     content = f"""
     <div class="space-y-8">
-        <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight">System Overview</h2>
-            <p class="text-sm text-slate-400">AIMCS Environment real-time telemetry analytics calculations.</p>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-white tracking-tight">System Overview</h2>
+                <p class="text-sm text-slate-400">AIMCS Environment real-time telemetry analytics calculations.</p>
+            </div>
+            <div class="flex items-center gap-2 bg-[#111827] border border-slate-800 p-1.5 rounded-xl">
+                <a href="/bulk" class="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Create Session
+                </a>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between">
+            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between group hover:border-blue-500/40 transition-colors">
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-slate-400">Total Registered Students</p>
                     <h3 class="text-3xl font-bold text-white tracking-tight">{students}</h3>
@@ -349,7 +359,7 @@ def dashboard():
                 </div>
             </div>
 
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between">
+            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between group hover:border-emerald-500/40 transition-colors">
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-slate-400">Total Valid Checks Logged</p>
                     <h3 class="text-3xl font-bold text-emerald-400 tracking-tight">{attendance}</h3>
@@ -359,7 +369,7 @@ def dashboard():
                 </div>
             </div>
 
-            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between md:col-span-2 lg:col-span-1">
+            <div class="bg-[#111827] border border-slate-800/80 p-6 rounded-2xl flex items-center justify-between md:col-span-2 lg:col-span-1 group hover:border-purple-500/40 transition-colors">
                 <div class="space-y-1">
                     <p class="text-sm font-medium text-slate-400">Database Framework</p>
                     <h3 class="text-lg font-bold text-white tracking-tight">SQLite3 Infrastructure</h3>
@@ -371,19 +381,37 @@ def dashboard():
         </div>
 
         <div class="bg-[#111827] border border-slate-800/80 rounded-2xl p-6">
-            <h3 class="text-base font-semibold text-white mb-4">Operational Administrative Control Console</h3>
+            <div class="flex justify-between items-center mb-6 border-b border-slate-800/60 pb-4">
+                <h3 class="text-base font-semibold text-white">Operational Data Extraction Gateways</h3>
+                <span class="text-[10px] bg-slate-800 px-2.5 py-1 rounded-md text-slate-400 font-mono font-bold tracking-wider">SECURE PIPELINES</span>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-plus-circle text-2xl text-blue-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Bulk QR Generator</span>
+                <a href="/bulk" class="flex items-center gap-4 p-4 bg-slate-900/50 hover:bg-slate-800/40 rounded-xl border border-slate-800/80 transition-all group">
+                    <div class="h-10 w-10 bg-blue-500/10 border border-blue-500/20 text-blue-500 rounded-lg flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-plus-circle"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-semibold text-white block">Bulk QR Generator</span>
+                        <span class="text-[11px] text-slate-400 block mt-0.5">Initialize targets</span>
+                    </div>
                 </a>
-                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-excel text-2xl text-emerald-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Export Excel Sheet</span>
+                <a href="/download" class="flex items-center gap-4 p-4 bg-slate-900/50 hover:bg-slate-800/40 rounded-xl border border-slate-800/80 transition-all group">
+                    <div class="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-lg flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-semibold text-white block">Export Excel Sheet</span>
+                        <span class="text-[11px] text-slate-400 block mt-0.5">Extract database matrices</span>
+                    </div>
                 </a>
-                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-800/30 hover:bg-slate-800/60 rounded-xl border border-slate-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-zipper text-2xl text-amber-500 mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-semibold text-white">Download QR Archive</span>
+                <a href="/download_qrs" class="flex items-center gap-4 p-4 bg-slate-900/50 hover:bg-slate-800/40 rounded-xl border border-slate-800/80 transition-all group">
+                    <div class="h-10 w-10 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-lg flex items-center justify-center text-base group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-file-zipper"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-semibold text-white block">Download QR Archive</span>
+                        <span class="text-[11px] text-slate-400 block mt-0.5">Compress token batches</span>
+                    </div>
                 </a>
             </div>
         </div>
@@ -571,8 +599,11 @@ def analysis():
     table_rows = ""
     if not df_logs.empty:
         for idx, row in df_logs.iterrows():
+            # Data attributes injected dynamically to support client-side filter engine
+            log_time = row['time']
+            date_part = log_time.split()[0] if log_time else ""
             table_rows += f"""
-            <tr class="border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/20 transition-colors">
+            <tr class="log-row border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/20 transition-colors" data-date="{date_part}">
                 <td class="px-6 py-3.5 font-medium text-white">{row['id']}</td>
                 <td class="px-6 py-3.5 font-semibold text-blue-400">{row['name']}</td>
                 <td class="px-6 py-3.5 font-mono text-slate-400">{row['time']}</td>
@@ -581,10 +612,13 @@ def analysis():
             """
     else:
         table_rows = """
-        <tr>
+        <tr id="emptyRow">
             <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500 font-medium">No system check-ins captured within the relational ledger array.</td>
         </tr>
         """
+
+    # Computing standard client-side date markers
+    today_iso = (datetime.utcnow() + timedelta(hours=4)).strftime("%Y-%m-%d")
 
     content = f"""
     <div class="space-y-8">
@@ -593,18 +627,27 @@ def analysis():
             <p class="text-sm text-slate-400">AIMCS statistical metrics computations framework.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 bg-[#111827] border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div class="lg:col-span-1 bg-[#111827] border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-center shadow-xl">
+                <div class="w-full border-b border-slate-800 pb-3 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-simple text-blue-500 text-xs"></i>
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Metrics Chart Visual</span>
+                </div>
                 {f'<img src="{chart_url}" class="rounded-xl w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12 font-medium">Insufficient timeline allocation instances to draw live plot configurations.</div>'}
             </div>
             
-            <div class="lg:col-span-2 bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-4">
-                <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Active Token Allocations Table</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/50">
+            <div class="lg:col-span-2 bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-key text-blue-500 text-xs"></i>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Token Allocations Table</h3>
+                    </div>
+                </div>
+                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/50 max-h-[260px] overflow-y-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-800/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="px-6 py-3">Mapping Instance</th>
+                        <thead class="sticky top-0 bg-[#161f30] z-10 border-b border-slate-800">
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="px-6 py-3">Instance ID</th>
                                 <th class="px-6 py-3">Identified Subject Target</th>
                                 <th class="px-6 py-3">Configured Temporal Allocation Bounds</th>
                             </tr>
@@ -617,11 +660,26 @@ def analysis():
             </div>
         </div>
 
-        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6">
-            <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Real-Time Ingestion Logs Stream</h3>
+        <div class="bg-[#111827] border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-list-timeline text-blue-500 text-xs"></i>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Real-Time Ingestion Logs Stream</h3>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-medium text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-filter text-[10px]"></i> Scope Selection:</label>
+                    <select id="timeFilterMenu" onchange="runTemporalFilter()" class="bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 cursor-pointer transition-colors">
+                        <option value="all">Display Full Matrix Logs</option>
+                        <option value="today">Today's Active Cycle Logs Only</option>
+                        <option value="past">Archived Historic Logs Only</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/50">
                 <div class="max-h-96 overflow-y-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse" id="logsDataTable">
                         <thead class="sticky top-0 bg-[#161f30] border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10">
                             <tr>
                                 <th class="px-6 py-3">Ingestion Index</th>
@@ -634,10 +692,55 @@ def analysis():
                             {table_rows}
                         </tbody>
                     </table>
+                    <div id="noLogsFallback" class="hidden px-6 py-12 text-center text-sm text-slate-500 font-medium">No log instances found matching the chosen drop-down scope constraint matrix.</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function runTemporalFilter() {{
+            const selectedScope = document.getElementById('timeFilterMenu').value;
+            const targetDayString = "{today_iso}";
+            const dataRows = document.querySelectorAll('.log-row');
+            const fallbackContainer = document.getElementById('noLogsFallback');
+            let matchingCounter = 0;
+
+            dataRows.forEach(row => {{
+                const instanceDate = row.getAttribute('data-date');
+                if (selectedScope === 'all') {{
+                    row.style.display = '';
+                    matchingCounter++;
+                }} else if (selectedScope === 'today') {{
+                    if (instanceDate === targetDayString) {{
+                        row.style.display = '';
+                        matchingCounter++;
+                    }} else {{
+                        row.style.display = 'none';
+                    }}
+                }} else if (selectedScope === 'past') {{
+                    if (instanceDate !== targetDayString && instanceDate !== '') {{
+                        row.style.display = '';
+                        matchingCounter++;
+                    }} else {{
+                        row.style.display = 'none';
+                    }}
+                }}
+            }});
+
+            const baselineFallback = document.getElementById('emptyRow');
+            if(baselineFallback) {{
+                fallbackContainer.style.display = 'none';
+                return;
+            }}
+
+            if (matchingCounter === 0) {{
+                fallbackContainer.classList.remove('hidden');
+            }} else {{
+                fallbackContainer.classList.add('hidden');
+            }}
+        }}
+    </script>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
