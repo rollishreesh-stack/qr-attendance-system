@@ -81,14 +81,14 @@ def load_user(user_id):
         return User(data[0], data[1])
     return None
 
-# ================= PREMIUM MASTER LAYOUT WITH PROFESSIONAL STYLING =================
+# ================= PREMIUM MASTER LAYOUT WITH GOLD KINETIC WALLPAPER =================
 LAYOUT_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIMCS | Attendance Management</title>
+    <title>AIMCS | Attendance System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -98,14 +98,41 @@ LAYOUT_TEMPLATE = """
         })();
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #0b0f19; 
+            background-color: #030712; 
         }
-        .font-brand {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        @keyframes streamLeft {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes streamRight {
+            0% { transform: translate3d(-50%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
+        }
+
+        .kinetic-track-left {
+            display: flex;
+            width: max-content;
+            animation: streamLeft 32s linear infinite;
+        }
+        .kinetic-track-right {
+            display: flex;
+            width: max-content;
+            animation: streamRight 38s linear infinite;
+        }
+        .motion-center-glow {
+            animation: subtlePulse 4s ease-in-out infinite;
+        }
+        @keyframes subtlePulse {
+            0%, 100% { opacity: 0.1; transform: scale(0.98); }
+            50% { opacity: 0.3; transform: scale(1.02); }
         }
 
         ::-webkit-scrollbar {
@@ -113,87 +140,103 @@ LAYOUT_TEMPLATE = """
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0b0f19;
+            background: #030712;
         }
         ::-webkit-scrollbar-thumb {
             background: #1e293b;
             border-radius: 10px;
         }
         
-        /* Custom overrides for the html5-qrcode scanner UI to match premium corporate theme */
+        /* Custom overrides for the html5-qrcode scanner UI to match dark theme */
         #reader { border: none !important; }
         #reader__dashboard_section_csr button {
-            background-color: #3b82f6 !important;
-            color: #ffffff !important;
+            background-color: #f59e0b !important;
+            color: #030712 !important;
             border: none !important;
-            padding: 10px 20px !important;
+            padding: 8px 16px !important;
             border-radius: 8px !important;
-            font-weight: 600 !important;
+            font-weight: bold !important;
             cursor: pointer !important;
             margin: 10px 0 !important;
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
-            transition: background 0.2s ease;
+            font-family: 'Outfit', sans-serif !important;
         }
-        #reader__dashboard_section_csr button:hover {
-            background-color: #2563eb !important;
-        }
-        #reader__dashboard_section_swaplink { color: #3b82f6 !important; text-decoration: none !important; font-weight: 500; }
-        #reader__scan_region { background: #111827 !important; border-radius: 12px; overflow: hidden; border: 1px solid #1f2937; }
+        #reader__dashboard_section_swaplink { color: #f59e0b !important; text-decoration: none !important; }
+        #reader__scan_region { background: #0b0f19 !important; border-radius: 12px; overflow: hidden; }
     </style>
 </head>
 <body class="text-slate-300 min-h-screen flex overflow-x-hidden relative">
 
-    <div class="fixed inset-0 w-screen h-screen pointer-events-none select-none overflow-hidden z-0 opacity-40">
-        <div class="absolute -top-[40%] -left-[20%] w-[80rem] h-[80rem] rounded-full bg-gradient-to-tr from-indigo-500/10 to-transparent blur-[120px]"></div>
-        <div class="absolute -bottom-[40%] -right-[20%] w-[80rem] h-[80rem] rounded-full bg-gradient-to-bl from-blue-500/5 to-transparent blur-[120px]"></div>
+    <div class="fixed inset-0 w-screen h-screen pointer-events-none select-none overflow-hidden z-0 flex flex-col justify-between py-8 opacity-40">
+        <div class="w-full overflow-hidden whitespace-nowrap text-[8.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/30">
+            <div class="kinetic-track-left">
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+            </div>
+        </div>
+        <div class="w-full overflow-hidden whitespace-nowrap text-[11rem] font-bold font-outfit uppercase tracking-[2.5rem] text-transparent" style="-webkit-text-stroke: 2px rgba(245, 158, 11, 0.4);">
+            <div class="kinetic-track-right">
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+            </div>
+        </div>
+        <div class="w-full overflow-hidden whitespace-nowrap text-[7rem] font-black font-outfit uppercase tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(251, 191, 36, 0.3);">
+            <div class="kinetic-track-left">
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+            </div>
+        </div>
+        <div class="w-full overflow-hidden whitespace-nowrap text-[9.5rem] font-black font-outfit uppercase tracking-[1.5rem] text-amber-500/20">
+            <div class="kinetic-track-right">
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+            </div>
+        </div>
     </div>
 
     {% if current_user.is_authenticated %}
-    <aside class="w-72 bg-[#111827]/90 backdrop-blur-xl border-r border-gray-800/80 flex flex-col fixed h-full z-20">
-        <div class="p-6 border-b border-gray-800/80 flex items-center gap-3">
-            <div class="bg-gradient-to-br from-indigo-500 to-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/10">
-                <i class="fa-solid fa-layer-group text-lg"></i>
+    <aside class="w-72 bg-[#0b0f19]/80 backdrop-blur-md border-r border-slate-800 flex flex-col fixed h-full z-20">
+        <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+            <div class="bg-slate-800 p-2.5 rounded-xl text-white shadow-md border border-slate-700">
+                <i class="fa-solid fa-graduation-cap text-xl"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-white tracking-tight font-brand">AIMCS Portal</h1>
-                <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Enterprise Suite</p>
+                <h1 class="text-xl font-black text-white tracking-wide font-outfit">AIMCS</h1>
+                <p class="text-xs text-slate-400">Attendance Manager</p>
             </div>
         </div>
         
         <nav class="flex-1 p-4 space-y-1 mt-3">
-            <a href="/" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
+            <a href="/" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-house text-base w-5 text-slate-500"></i> Home Gateway
             </a>
-            <a href="/dashboard" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
+            <a href="/dashboard" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-chart-pie text-base w-5 text-slate-500"></i> Dashboard
             </a>
-            <a href="/scanner" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-blue-400 bg-blue-500/5 border border-blue-500/10 hover:bg-blue-500/10">
-                <i class="fa-solid fa-camera text-base w-5 text-blue-400"></i> Live Scanner Kiosk
+            <a href="/scanner" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                <i class="fa-solid fa-camera-viewfinder text-base w-5 text-amber-500"></i> Live Scanner Kiosk
             </a>
-            <a href="/bulk" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
+            <a href="/bulk" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-qrcode text-base w-5 text-slate-500"></i> Create QR Codes
             </a>
-            <a href="/analysis" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
+            <a href="/analysis" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
                 <i class="fa-solid fa-chart-line text-base w-5 text-slate-500"></i> Analytics
             </a>
-            <a href="/profile" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white">
-                <i class="fa-solid fa-shield-halved text-base w-5 text-slate-500"></i> Security Settings
+            <a href="/profile" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                <i class="fa-solid fa-key text-base w-5 text-slate-500"></i> Change Password
             </a>
-            <a href="/logout" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-rose-400 hover:bg-rose-500/5 hover:text-rose-300">
+            <a href="/logout" class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-300">
                 <i class="fa-solid fa-right-from-bracket text-base w-5"></i> Logout
             </a>
         </nav>
 
-        <div class="p-4 border-t border-gray-800/80">
-            <div class="bg-gray-900/60 p-4 rounded-xl border border-gray-800/50 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-slate-800 text-slate-200 flex items-center justify-center font-bold text-sm border border-slate-700">
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-sm border border-slate-700">
                     {{ current_user.username[0].upper() }}
                 </div>
                 <div class="truncate">
-                    <p class="text-xs font-semibold text-white truncate font-brand">{{ current_user.username }}</p>
-                    <p class="text-[10px] text-emerald-400 truncate font-medium flex items-center gap-1">
-                        <span class="h-1 w-1 rounded-full bg-emerald-400"></span> Management Node
-                    </p>
+                    <p class="text-xs font-semibold text-white truncate font-outfit">{{ current_user.username }}</p>
+                    <p class="text-[10px] text-amber-400 truncate font-mono">Active Session</p>
                 </div>
             </div>
         </div>
@@ -201,13 +244,13 @@ LAYOUT_TEMPLATE = """
     {% endif %}
 
     <main class="flex-1 {% if current_user.is_authenticated %}pl-72{% endif %} min-h-screen flex flex-col relative z-10">
-        <header id="mainHeader" class="h-20 bg-[#0b0f19]/70 backdrop-blur-xl border-b border-gray-800/60 flex items-center justify-between px-8 sticky top-0 z-30">
+        <header id="mainHeader" class="h-20 bg-[#030712]/60 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30">
             <div class="flex items-center gap-2">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase font-brand">System Integrity Nominal</p>
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase font-outfit">AIMCS System Online</p>
             </div>
-            <div class="text-xs font-medium text-slate-400 bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800/80 shadow-sm">
-                <i class="fa-regular fa-clock mr-2 text-indigo-400"></i> <span id="liveClock" class="font-mono text-slate-300"></span>
+            <div class="text-xs font-medium text-slate-300 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
+                <i class="fa-regular fa-clock mr-2 text-amber-500"></i> <span id="liveClock" class="font-mono"></span>
             </div>
         </header>
 
@@ -235,22 +278,22 @@ def scanner():
     content = """
     <div class="max-w-2xl mx-auto space-y-6 w-full">
         <div class="text-center">
-            <h2 class="text-2xl font-bold text-white tracking-tight font-brand">Live Kiosk Scanner</h2>
-            <p class="text-sm text-slate-400 mt-1">Position a tokenized identity QR matrix near the optical frame sensor.</p>
+            <h2 class="text-3xl font-bold text-white tracking-tight font-outfit">Live Kiosk Scanner</h2>
+            <p class="text-sm text-slate-400 mt-1">Point a student's QR code at the camera. It scans instantly like NFC.</p>
         </div>
         
-        <div class="bg-[#111827]/80 backdrop-blur-xl border border-gray-800/80 rounded-2xl p-6 shadow-xl relative">
+        <div class="bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)] relative">
             
-            <div class="absolute inset-0 border border-blue-500/20 rounded-2xl m-6 pointer-events-none z-10">
-                <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-blue-500/70"></div>
-                <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-blue-500/70"></div>
-                <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-blue-500/70"></div>
-                <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-blue-500/70"></div>
+            <div class="absolute inset-0 border-2 border-amber-500/20 rounded-2xl m-6 pointer-events-none z-10">
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-amber-500"></div>
+                <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-amber-500"></div>
+                <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-500"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-500"></div>
             </div>
 
-            <div id="reader" class="w-full rounded-xl overflow-hidden relative z-0 min-h-[300px] flex items-center justify-center bg-gray-950"></div>
+            <div id="reader" class="w-full rounded-xl overflow-hidden relative z-0 min-h-[300px] flex items-center justify-center bg-slate-900"></div>
             
-            <div id="scanResult" class="hidden mt-4 p-4 rounded-xl text-center font-semibold text-sm shadow-sm transition-all duration-300"></div>
+            <div id="scanResult" class="hidden mt-4 p-4 rounded-xl text-center font-bold text-sm shadow-md transition-all duration-300"></div>
         </div>
 
         <script src="https://unpkg.com/html5-qrcode"></script>
@@ -258,8 +301,10 @@ def scanner():
             let html5QrcodeScanner;
             
             function onScanSuccess(decodedText, decodedResult) {
+                // Pause the scanner to prevent double-scanning the same code rapidly
                 html5QrcodeScanner.pause();
                 
+                // Extract token from URL
                 let token = '';
                 try {
                     token = decodedText.split('/mark/')[1];
@@ -271,10 +316,12 @@ def scanner():
                     return;
                 }
 
+                // Call the background API
                 fetch('/api/mark/' + token)
                     .then(res => res.json())
                     .then(data => {
                         showResult(data.message, data.status);
+                        // Resume scanning after 2.5 seconds automatically
                         setTimeout(() => {
                             document.getElementById('scanResult').classList.add('hidden');
                             html5QrcodeScanner.resume();
@@ -288,17 +335,17 @@ def scanner():
 
             function showResult(msg, type) {
                 const resDiv = document.getElementById('scanResult');
-                resDiv.classList.remove('hidden', 'bg-emerald-500/5', 'text-emerald-400', 'bg-rose-500/5', 'text-rose-400', 'bg-blue-500/5', 'text-blue-400', 'border-emerald-500/20', 'border-rose-500/20', 'border-blue-500/20');
+                resDiv.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'bg-rose-500/10', 'text-rose-400', 'bg-amber-500/10', 'text-amber-400', 'border-emerald-500/20', 'border-rose-500/20', 'border-amber-500/20');
                 
                 if (type === 'success') {
-                    resDiv.classList.add('bg-emerald-500/5', 'text-emerald-400', 'border', 'border-emerald-500/20');
-                    resDiv.innerHTML = `<i class="fa-solid fa-circle-check text-lg mr-2 align-middle"></i> <span class="font-brand tracking-wide">${msg}</span>`;
+                    resDiv.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-circle-check text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
                 } else if (type === 'error') {
-                    resDiv.classList.add('bg-rose-500/5', 'text-rose-400', 'border', 'border-rose-500/20');
-                    resDiv.innerHTML = `<i class="fa-solid fa-circle-xmark text-lg mr-2 align-middle"></i> <span class="font-brand tracking-wide">${msg}</span>`;
+                    resDiv.classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-circle-xmark text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
                 } else {
-                    resDiv.classList.add('bg-blue-500/5', 'text-blue-400', 'border', 'border-blue-500/20');
-                    resDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-lg mr-2 align-middle"></i> <span class="font-brand tracking-wide">${msg}</span>`;
+                    resDiv.classList.add('bg-amber-500/10', 'text-amber-400', 'border', 'border-amber-500/20');
+                    resDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xl mb-1 block"></i> <span class="font-outfit uppercase tracking-wider">${msg}</span>`;
                 }
             }
 
@@ -317,6 +364,10 @@ def scanner():
 # ================= BACKGROUND API FOR CONTINUOUS SCANNING =================
 @app.route("/api/mark/<token>")
 def api_mark(token):
+    """
+    Silent background endpoint used by the Live Scanner to quickly tap-and-go 
+    without redirecting the admin away from the camera feed.
+    """
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
@@ -374,31 +425,31 @@ def login():
             login_user(userobj)
             return redirect(url_for("home"))
         else:
-            error_msg = "Invalid credentials. Integration refused."
+            error_msg = "Invalid username or password."
 
     content = f"""
-    <div class="relative z-20 max-w-md w-full mx-auto my-auto bg-[#111827]/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-8 space-y-6 shadow-2xl">
+    <div class="relative z-20 max-w-md w-full mx-auto my-auto bg-[#0b0f19]/80 backdrop-blur-xl border border-slate-800/90 rounded-2xl p-8 space-y-6 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)]">
         <div class="text-center space-y-2">
-            <div class="inline-flex p-3 bg-gray-900 border border-gray-800 text-indigo-400 rounded-xl mb-1">
-                <i class="fa-solid fa-shield text-xl"></i>
+            <div class="inline-flex p-3.5 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl mb-1 shadow-inner">
+                <i class="fa-solid fa-lock text-2xl"></i>
             </div>
-            <h2 class="text-xl font-bold text-white tracking-tight font-brand">Administrative Node Gateway</h2>
-            <p class="text-xs text-slate-400">Provide authoritative parameters to access management network.</p>
+            <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">Admin Sign In</h2>
+            <p class="text-xs text-slate-400">Enter account details to connect to the AIMCS matrix.</p>
         </div>
         
-        {f'<div class="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">{error_msg}</div>' if error_msg else ''}
+        {f'<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">{error_msg}</div>' if error_msg else ''}
 
         <form method="POST" class="space-y-4">
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-brand">Username</label>
-                <input type="text" name="username" class="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" placeholder="Admin username" required>
+            <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit">Username</label>
+                <input type="text" name="username" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="Enter username" required>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-brand">Password</label>
-                <input type="password" name="password" class="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" placeholder="Password security key" required>
+            <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit">Password</label>
+                <input type="password" name="password" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="Enter password" required>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition-all shadow-md shadow-indigo-600/10">
-                Authenticate Secure Session
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm transition-all border border-amber-400 shadow-md">
+                Sign In
             </button>
         </form>
     </div>
@@ -430,31 +481,30 @@ def profile():
             new_hash = generate_password_hash(new_pass)
             c.execute("UPDATE admin_users SET password=? WHERE id=?", (new_hash, current_user.id))
             conn.commit()
-            status_msg = """<div class="p-3 bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl font-medium text-center">Password signature successfully modulated.</div>"""
+            status_msg = """<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl font-medium text-center">Password updated successfully.</div>"""
         else:
-            status_msg = """<div class="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">Current operational security key verification failed.</div>"""
+            status_msg = """<div class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-medium text-center">Current password is incorrect.</div>"""
         conn.close()
 
     content = f"""
-    <div class="max-w-xl mx-auto bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-8 space-y-6 shadow-xl">
-        <div class="border-b border-gray-800 pb-3">
-            <h2 class="text-lg font-bold text-white tracking-tight font-brand">Update Authorization Token</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Revoke old credentials and initialize modified structural parameters.</p>
+    <div class="max-w-xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 space-y-6 shadow-xl">
+        <div class="border-b border-slate-800 pb-3">
+            <h2 class="text-xl font-bold text-white tracking-tight font-outfit">Change Password</h2>
         </div>
 
         {status_msg}
 
         <form method="POST" class="space-y-4">
-            <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-brand">Current Password Matrix</label>
-                <input type="password" name="old_password" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" required>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wide font-outfit">Current Password</label>
+                <input type="password" name="old_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" required>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider font-brand">New Configuration Password</label>
-                <input type="password" name="new_password" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors" required>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wide font-outfit">New Password</label>
+                <input type="password" name="new_password" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors" required>
             </div>
-            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm transition-all shadow-md">
-                Commit Structural Modification
+            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm transition-all border border-amber-400 shadow-md">
+                Save Changes
             </button>
         </form>
     </div>
@@ -467,28 +517,49 @@ def profile():
 def home():
     content = """
     <div class="w-full max-w-4xl mx-auto mt-12">
-        <div class="relative w-full rounded-2xl overflow-hidden border border-gray-800/80 bg-[#111827]/80 backdrop-blur-xl shadow-2xl p-12 md:p-16">
-            
-            <div class="relative z-20 max-w-xl space-y-6">
-                <div class="space-y-2">
-                    <div class="inline-flex px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[11px] font-semibold tracking-wide text-indigo-400 uppercase font-brand">
-                        Operational Framework Core
+        <div class="relative w-full rounded-2xl overflow-hidden border border-slate-800/80 bg-[#0b0f19]/80 backdrop-blur-md shadow-[0_0_50px_-15px_rgba(245,158,11,0.1)] p-12 md:p-16">
+            <div class="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-30 flex flex-col justify-between py-6 z-0">
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="kinetic-track-left text-[6rem] font-black font-outfit tracking-[2rem] text-transparent" style="-webkit-text-stroke: 1.5px rgba(245, 158, 11, 0.4);">
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight font-brand leading-tight">
-                        AIMCS Attendance Optimization System
-                    </h2>
                 </div>
                 
-                <p class="text-sm text-slate-400 leading-relaxed font-normal border-l-2 border-slate-700 pl-4">
-                    Deploy cryptographically isolated identity matrices, orchestrate localized telemetric scans, and archive automated real-time verification logs inside a highly-secure architectural framework.
+                <div class="absolute inset-0 flex items-center justify-center font-outfit font-black text-[14rem] text-transparent bg-clip-text bg-gradient-to-b from-amber-500/20 via-amber-500/5 to-transparent tracking-widest uppercase motion-center-glow z-0">
+                    AIMCS
+                </div>
+
+                <div class="w-full overflow-hidden whitespace-nowrap">
+                    <div class="kinetic-track-right text-[5rem] font-bold font-outfit tracking-[3rem] text-transparent" style="-webkit-text-stroke: 1px rgba(251, 191, 36, 0.3);">
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                        <span>AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;AIMCS&nbsp;</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute inset-0 bg-gradient-to-r from-[#0b0f19] via-[#0b0f19]/80 to-transparent z-10"></div>
+
+            <div class="relative z-20 max-w-xl space-y-5">
+                <div class="space-y-1">
+                    <h2 class="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-400 to-amber-700 tracking-wider font-outfit drop-shadow-lg">
+                        AIMCS
+                    </h2>
+                    <h3 class="text-xs text-amber-500/80 font-bold tracking-[0.3em] font-outfit uppercase">
+                        Enterprise Attendance Core
+                    </h3>
+                </div>
+                
+                <p class="text-sm text-slate-300 leading-relaxed font-light border-l border-amber-500/50 pl-4">
+                    Generate temporary tokenized QR codes, stream real-time logs, verify security stamps, and launch the Live Kiosk Scanner to rapidly scan students like an NFC tap.
                 </p>
                 
-                <div class="pt-2 flex flex-wrap gap-3">
-                    <a href="/dashboard" class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md shadow-indigo-600/10">
-                        Open Management Node <i class="fa-solid fa-arrow-right ml-2 text-[10px]"></i>
+                <div class="pt-2 flex gap-3">
+                    <a href="/dashboard" class="inline-flex items-center justify-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] text-xs font-bold rounded-xl transition-all border border-amber-400 shadow-md">
+                        Open Dashboard Portal <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
                     </a>
-                    <a href="/scanner" class="inline-flex items-center justify-center px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-slate-300 text-xs font-semibold rounded-xl transition-all border border-gray-800 shadow-sm">
-                        <i class="fa-solid fa-video mr-2 text-[11px] text-indigo-400"></i> Initialize Optical Scanner
+                    <a href="/scanner" class="inline-flex items-center justify-center px-6 py-3 bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-bold rounded-xl transition-all border border-slate-700 shadow-md">
+                        <i class="fa-solid fa-camera mr-2 text-xs"></i> Launch Live Scanner
                     </a>
                 </div>
             </div>
@@ -512,62 +583,60 @@ def dashboard():
     content = f"""
     <div class="space-y-6 w-full max-w-4xl mx-auto">
         <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight font-brand">System Telemetry Dashboard</h2>
-            <p class="text-xs text-slate-400 mt-0.5">High-level operational index pipeline and tactical instrumentation parameters.</p>
+            <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">System Overview</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Summary indexes and administrative tools pipeline.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-[#111827]/80 backdrop-blur-md border border-gray-800/80 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:border-slate-700 transition-colors">
-                <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-brand">Registered Directives</p>
-                    <h3 class="text-3xl font-bold text-white font-brand tracking-tight">{students}</h3>
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-amber-500/30 transition-colors">
+                <div class="space-y-0.5">
+                    <p class="text-xs font-medium text-slate-400">Registered Students</p>
+                    <h3 class="text-3xl font-bold text-white font-outfit tracking-tight">{students}</h3>
                 </div>
-                <div class="h-10 w-10 bg-gray-900 border border-gray-800 text-indigo-400 rounded-xl flex items-center justify-center text-sm shadow-inner">
-                    <i class="fa-solid fa-address-book"></i>
-                </div>
-            </div>
-
-            <div class="bg-[#111827]/80 backdrop-blur-md border border-gray-800/80 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:border-slate-700 transition-colors">
-                <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-brand">Synchronized Scans</p>
-                    <h3 class="text-3xl font-bold text-white font-brand tracking-tight">{attendance}</h3>
-                </div>
-                <div class="h-10 w-10 bg-gray-900 border border-gray-800 text-blue-400 rounded-xl flex items-center justify-center text-sm shadow-inner">
-                    <i class="fa-solid fa-fingerprint"></i>
+                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl flex items-center justify-center text-base shadow-sm">
+                    <i class="fa-solid fa-users"></i>
                 </div>
             </div>
 
-            <div class="bg-[#111827]/80 backdrop-blur-md border border-gray-800/80 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:border-emerald-500/20 transition-colors">
-                <div class="space-y-1">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 font-brand">Server Cluster Core</p>
-                    <h3 class="text-sm font-bold text-emerald-400 font-brand mt-1.5 flex items-center gap-1.5">
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Fully Operational
-                    </h3>
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-amber-500/30 transition-colors">
+                <div class="space-y-0.5">
+                    <p class="text-xs font-medium text-slate-400">Total Scan Logs</p>
+                    <h3 class="text-3xl font-bold text-white font-outfit tracking-tight">{attendance}</h3>
                 </div>
-                <div class="h-10 w-10 bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center text-sm shadow-inner">
-                    <i class="fa-solid fa-network-wired"></i>
+                <div class="h-10 w-10 bg-slate-900 border border-slate-800 text-amber-500 rounded-xl flex items-center justify-center text-base shadow-sm">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-md hover:border-emerald-500/30 transition-colors">
+                <div class="space-y-0.5">
+                    <p class="text-xs font-medium text-slate-400">System Status</p>
+                    <h3 class="text-base font-bold text-emerald-400 font-outfit mt-1">Operational</h3>
+                </div>
+                <div class="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center text-base shadow-sm">
+                    <i class="fa-solid fa-server"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-[#111827]/80 backdrop-blur-md border border-gray-800/80 rounded-2xl p-6 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider font-brand">Deployment Matrix Operations</h3>
+        <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-md">
+            <h3 class="text-sm font-semibold text-white mb-4 uppercase tracking-wider font-outfit">Management Actions</h3>
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <a href="/scanner" class="flex flex-col items-center justify-center p-5 bg-gray-900/40 hover:bg-indigo-500/5 hover:border-indigo-500/30 rounded-xl border border-gray-800 text-center group transition-all">
-                    <i class="fa-solid fa-expand text-lg text-slate-400 mb-2 group-hover:text-indigo-400 transition-colors"></i>
-                    <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">Launch Optical Kiosk</span>
+                <a href="/scanner" class="flex flex-col items-center justify-center p-5 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-400 rounded-xl border border-amber-500/40 text-center group transition-all">
+                    <i class="fa-solid fa-camera-viewfinder text-xl text-amber-500 mb-2 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white transition-colors">Open Scanner Kiosk</span>
                 </a>
-                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-gray-900/40 hover:bg-indigo-500/5 hover:border-indigo-500/30 rounded-xl border border-gray-800 text-center group transition-all">
-                    <i class="fa-solid fa-qrcode text-lg text-slate-400 mb-2 group-hover:text-indigo-400 transition-colors"></i>
-                    <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">Generate Batch Identifiers</span>
+                <a href="/bulk" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-qrcode text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Create QR Codes</span>
                 </a>
-                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-gray-900/40 hover:bg-indigo-500/5 hover:border-indigo-500/30 rounded-xl border border-gray-800 text-center group transition-all">
-                    <i class="fa-solid fa-file-invoice text-lg text-slate-400 mb-2 group-hover:text-indigo-400 transition-colors"></i>
-                    <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">Export Telemetry Ledger</span>
+                <a href="/download" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-file-excel text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Export Excel Sheet</span>
                 </a>
-                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-gray-900/40 hover:bg-indigo-500/5 hover:border-indigo-500/30 rounded-xl border border-gray-800 text-center group transition-all">
-                    <i class="fa-solid fa-box-archive text-lg text-slate-400 mb-2 group-hover:text-indigo-400 transition-colors"></i>
-                    <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">Download Matrix Assets</span>
+                <a href="/download_qrs" class="flex flex-col items-center justify-center p-5 bg-slate-900/50 hover:bg-amber-500/10 hover:border-amber-500/40 rounded-xl border border-slate-800 text-center group transition-all">
+                    <i class="fa-solid fa-file-zipper text-xl text-slate-400 mb-2 group-hover:text-amber-500 group-hover:scale-105 transition-all"></i>
+                    <span class="text-xs font-semibold text-white group-hover:text-amber-400 transition-colors">Download All QRs</span>
                 </a>
             </div>
         </div>
@@ -628,13 +697,13 @@ def bulk():
         js_data = "\n".join(js_students)
 
         content = f"""
-        <div class="max-w-xl mx-auto bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-8 text-center space-y-5 shadow-xl">
-            <div class="inline-flex p-3 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
-                <i class="fa-solid fa-circle-check text-2xl"></i>
+        <div class="max-w-xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 text-center space-y-5 shadow-[0_0_40px_-15px_rgba(245,158,11,0.15)]">
+            <div class="inline-flex p-3.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20">
+                <i class="fa-solid fa-circle-check text-3xl"></i>
             </div>
-            <h2 class="text-xl font-bold text-white tracking-tight font-brand">Batch Modulated Safely</h2>
+            <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">QR Batch Generated</h2>
             <p class="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
-                Tokens successfully engineered for <span class="text-indigo-400 font-semibold">{success}</span> corporate nodes. Structural distribution ongoing via centralized relay pipelines.
+                Successfully configured tokens for <span class="text-amber-500 font-bold">{success}</span> student(s). Automated relays are firing notifications via EmailJS.
             </p>
 
             <script>
@@ -667,9 +736,9 @@ def bulk():
             }});
             </script>
 
-            <div class="pt-4 border-t border-gray-800">
-                <a href='/dashboard' class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md">
-                    Return to Operational Base
+            <div class="pt-4 border-t border-slate-800">
+                <a href='/dashboard' class="inline-flex items-center justify-center px-5 py-2 bg-amber-500 hover:bg-amber-600 text-[#030712] text-xs font-bold rounded-xl border border-amber-400 shadow-md">
+                    Return to Dashboard
                 </a>
             </div>
         </div>
@@ -677,32 +746,32 @@ def bulk():
         return render_template_string(LAYOUT_TEMPLATE, content=content)
 
     content = """
-    <div class="max-w-2xl mx-auto bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-8 space-y-6 shadow-md">
-        <div class="border-b border-gray-800 pb-3">
-            <h2 class="text-xl font-bold text-white tracking-tight font-brand">Engineering Structural QR Vectors</h2>
-            <p class="text-xs text-slate-400 mt-1">Configure chronological perimeter parameters and directory listings.</p>
+    <div class="max-w-2xl mx-auto bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-8 space-y-6 shadow-md">
+        <div class="border-b border-slate-800 pb-3">
+            <h2 class="text-xl font-bold text-white tracking-tight font-outfit">Generate QR Codes in Bulk</h2>
+            <p class="text-xs text-slate-400 mt-1">Configure expiration horizons and paste the directory entries.</p>
         </div>
 
         <form method='POST' class="space-y-5">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-1.5">
-                    <label class='text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-brand'>Validation Horizon Start</label>
-                    <input type='datetime-local' name='start_time' class='w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors' required>
+                <div class="space-y-1">
+                    <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Validity Lock Starts</label>
+                    <input type='datetime-local' name='start_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors' required>
                 </div>
-                <div class="space-y-1.5">
-                    <label class='text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-brand'>Validation Horizon End</label>
-                    <input type='datetime-local' name='end_time' class='w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50 transition-colors' required>
+                <div class="space-y-1">
+                    <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Validity Lock Closes</label>
+                    <input type='datetime-local' name='end_time' class='w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-colors' required>
                 </div>
             </div>
 
-            <div class="space-y-1.5">
-                <label class='text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-brand'>Corporate Entity Directories (Syntax: Name, Email Address)</label>
-                <textarea name='data' class='w-full h-40 bg-gray-900 border border-gray-800 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-indigo-500/50 transition-colors font-mono' placeholder="Alice Smith, alice@organization.com&#10;Bob Jones, bob@organization.com" required></textarea>
-                <p class="text-[11px] text-slate-500 italic mt-1">Isolate sequential records using unified line-breaks and comma-demarcations.</p>
+            <div class="space-y-1">
+                <label class='text-[11px] font-bold text-slate-400 uppercase tracking-wide font-outfit'>Recipient Profiles Matrix (Format: Name, Email)</label>
+                <textarea name='data' class='w-full h-40 bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-500/50 transition-colors font-mono' placeholder="John Doe, john@example.com&#10;Jane Smith, jane@example.com" required></textarea>
+                <p class="text-[11px] text-slate-500 italic mt-1">One record line configuration per student separated by commas.</p>
             </div>
             
-            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl text-sm shadow-md transition-all">
-                Publish Identifiers & Broadcast Matrices
+            <button type='submit' class="w-full inline-flex items-center justify-center px-4 py-3 bg-amber-500 hover:bg-amber-600 text-[#030712] font-bold rounded-xl text-sm border border-amber-400 shadow-md transition-all">
+                Deploy & Broadcast QR Codes
             </button>
         </form>
     </div>
@@ -725,23 +794,22 @@ def analysis():
             attendance_counts = df_logs.groupby('date_only').size()
 
             plt.figure(figsize=(7, 3))
-            plt.gcf().patch.set_facecolor('#111827')
+            plt.gcf().patch.set_facecolor('#0b0f19')
             plt.gcf().patch.set_alpha(0.0)
             ax = plt.gca()
-            ax.set_facecolor('#111827')
+            ax.set_facecolor('#0b0f19')
             ax.patch.set_alpha(0.0)
             
-            # Professionally colored indigo bars matching corporate tone
-            attendance_counts.plot(kind='bar', color='#4f46e5', width=0.35, ax=ax)
+            attendance_counts.plot(kind='bar', color='#f59e0b', width=0.35, ax=ax)
             
             ax.tick_params(colors='#94a3b8', labelsize=8)
             ax.spines['bottom'].set_color('#334155')
             ax.spines['left'].set_color('#334155')
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
-            ax.grid(axis='y', color='#334155', linestyle='--', alpha=0.1)
+            ax.grid(axis='y', color='#334155', linestyle='--', alpha=0.2)
             
-            plt.title("Synchronized Time-Series Indexes", color='white', fontsize=11, pad=10, weight='semibold', fontname='sans-serif')
+            plt.title("Attendance Metrics Graph", color='white', fontsize=11, pad=10, weight='bold')
             plt.tight_layout()
             
             img_buf = io.BytesIO()
@@ -757,62 +825,62 @@ def analysis():
     if not df_logs.empty:
         for idx, row in df_logs.iterrows():
             table_rows += f"""
-            <tr class="border-b border-gray-800/60 text-slate-300 text-xs hover:bg-slate-800/30 transition-colors">
+            <tr class="border-b border-slate-800/60 text-slate-300 text-xs hover:bg-slate-800/40 transition-colors">
                 <td class="px-5 py-3 font-mono text-slate-500">#{row['id']}</td>
-                <td class="px-5 py-3 font-medium text-white">{row['name']}</td>
+                <td class="px-5 py-3 font-semibold text-white">{row['name']}</td>
                 <td class="px-5 py-3 font-mono text-slate-400">{row['time']}</td>
-                <td class="px-5 py-3"><span class="px-2 py-0.5 bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-semibold tracking-wide">VERIFIED</span></td>
+                <td class="px-5 py-3"><span class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-bold">VERIFIED</span></td>
             </tr>
             """
     else:
         table_rows = """
         <tr>
-            <td colspan="4" class="px-5 py-10 text-center text-xs text-slate-500">No telemetry data logs mapped within storage array.</td>
+            <td colspan="4" class="px-5 py-10 text-center text-xs text-slate-500">No telemetry logs available in database storage.</td>
         </tr>
         """
 
     content = f"""
     <div class="space-y-6 w-full max-w-4xl mx-auto">
         <div>
-            <h2 class="text-2xl font-bold text-white tracking-tight font-brand">Statistical Metrics Analysis</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Track system integration indexes, authoritative identity matrices, and physical authorization endpoints.</p>
+            <h2 class="text-2xl font-bold text-white tracking-tight font-outfit">Attendance Analytics</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Track system deployment logs, active student registers, and validation checkpoints.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div class="lg:col-span-1 bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-4 flex flex-col justify-center items-center shadow-sm">
-                {f'<img src="{chart_url}" class="w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12">Insufficient quantitative array metrics to draw statistical vector graph.</div>'}
+            <div class="lg:col-span-1 bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-4 flex flex-col justify-center items-center shadow-md">
+                {f'<img src="{chart_url}" class="w-full" />' if chart_url else '<div class="text-slate-500 text-xs text-center py-12">Insufficient metric indexes to formulate graph vector.</div>'}
             </div>
             
-            <div class="lg:col-span-2 bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-5 space-y-3 shadow-sm">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-brand">Active Authorization Matrix Directory</h3>
-                <div class="overflow-x-auto border border-gray-800/60 rounded-xl bg-gray-900/20">
+            <div class="lg:col-span-2 bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-5 space-y-3 shadow-md">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider font-outfit">Active Registration Directories</h3>
+                <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/40">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-gray-900 border-b border-gray-800 text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">
-                                <th class="px-5 py-2.5">Index ID</th>
-                                <th class="px-5 py-2.5">Node Label</th>
-                                <th class="px-5 py-2.5">Active Authorization Horizon Limits</th>
+                            <tr class="bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-amber-500 uppercase tracking-wider">
+                                <th class="px-5 py-2.5">Index</th>
+                                <th class="px-5 py-2.5">Identifier</th>
+                                <th class="px-5 py-2.5">Scan Window Authorization Horizon</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-800/40 text-xs text-slate-300">
-                            {"".join([f'<tr class="hover:bg-slate-800/30 transition-colors"><td class="px-5 py-2.5 font-mono text-slate-500">#{i+1}</td><td class="px-5 py-2.5 font-medium text-white">{r["name"]}</td><td class="px-5 py-2.5 font-mono text-slate-400 text-[11px]">{r["start_time"]} ➔ {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-5 py-5 text-center text-slate-500">No structural parameters defined yet.</td></tr>'}
+                        <tbody class="divide-y divide-slate-800/40 text-xs text-slate-300">
+                            {"".join([f'<tr class="hover:bg-slate-800/40 transition-colors"><td class="px-5 py-2.5 font-mono text-slate-500">#{i+1}</td><td class="px-5 py-2.5 font-semibold text-white">{r["name"]}</td><td class="px-5 py-2.5 font-mono text-slate-400 text-[11px]">{r["start_time"]} to {r["end_time"]}</td></tr>' for i, r in df_config.iterrows()]) if not df_config.empty else '<tr><td colspan="3" class="px-5 py-5 text-center text-slate-500">No profile parameters defined.</td></tr>'}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="bg-[#111827]/80 backdrop-blur-md border border-gray-800 rounded-2xl p-5 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 font-brand">Real-Time Sync Telemetry Pipeline</h3>
-            <div class="overflow-hidden border border-gray-800 rounded-xl bg-gray-900/20">
+        <div class="bg-[#0b0f19]/80 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-md">
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-outfit">Live Synchronization Stream</h3>
+            <div class="overflow-hidden border border-slate-800 rounded-xl bg-slate-900/40">
                 <div class="max-h-64 overflow-y-auto">
                     <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-gray-900 border-b border-gray-800 text-[10px] font-semibold text-indigo-400 uppercase tracking-wider z-10">
+                        <thead class="sticky top-0 bg-slate-900 border-b border-slate-800 text-[10px] font-bold text-amber-500 uppercase tracking-wider z-10">
                             <tr>
-                                <th class="px-5 py-2.5">Log Segment ID</th>
-                                <th class="px-5 py-2.5">Associated Identity Label</th>
-                                <th class="px-5 py-2.5">Telemetric Stamp</th>
-                                <th class="px-5 py-2.5">Verification Signature</th>
+                                <th class="px-5 py-2.5">Log ID</th>
+                                <th class="px-5 py-2.5">Client Token Name</th>
+                                <th class="px-5 py-2.5">Timestamp</th>
+                                <th class="px-5 py-2.5">Authentication</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -841,10 +909,10 @@ def mark(token):
     data = c.fetchone()
 
     PAGE_BODY_STYLE = """
-    font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+    font-family: 'Inter', system-ui, sans-serif; 
     text-align: center; 
     padding: 80px 16px; 
-    background-color: #0b0f19; 
+    background-color: #030712; 
     color: #f8fafc; 
     min-height: 100vh; 
     box-sizing: border-box; 
@@ -854,13 +922,13 @@ def mark(token):
     """
     
     PANEL_CARD_STYLE = """
-    max-width: 440px; 
+    max-width: 460px; 
     width: 100%; 
-    background-color: #111827; 
-    border: 1px solid #1f2937; 
-    padding: 40px 32px; 
-    border-radius: 16px; 
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    background-color: #0b0f19; 
+    border: 1px solid #1e293b; 
+    padding: 40px 24px; 
+    border-radius: 20px; 
+    box-shadow: 0 20px 40px -15px rgba(245,158,11,0.1);
     """
 
     if not data:
@@ -868,9 +936,9 @@ def mark(token):
         return f"""
         <div style="{PAGE_BODY_STYLE}">
             <div style="{PANEL_CARD_STYLE}">
-                <div style="color:#ef4444; font-size:36px; margin-bottom:16px;">✕</div>
-                <h2 style="margin:0 0 6px 0; font-size:18px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">Invalid Identity Token Reference</h2>
-                <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin:0;">The credential verification matrix queried does not map to an authoritative configuration node or has been permanently purged.</p>
+                <div style="color:#ef4444; font-size:44px; margin-bottom:14px;">✖</div>
+                <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700;">Invalid Link Identifier</h2>
+                <p style="color:#94a3b8; font-size:13px; line-height:1.5; margin:0;">This attendance verification matrix is missing or expired.</p>
             </div>
         </div>
         """
@@ -889,11 +957,11 @@ def mark(token):
         return f"""
         <div style="{PAGE_BODY_STYLE}">
             <div style="{PANEL_CARD_STYLE}">
-                <div style="color:#6366f1; font-size:36px; margin-bottom:16px;">🔒</div>
-                <h2 style="margin:0 0 6px 0; font-size:18px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">Telemetric Transmission Sealed</h2>
-                <p style="color:#94a3b8; font-size:13px; margin:0 0 20px 0; line-height:1.6;">This verification authorization window has not initialized operational capability yet.</p>
-                <div style="background-color:#1f2937; padding:12px; border-radius:10px; font-family:monospace; font-size:12px; color:#94a3b8; border:1px solid #374151;">
-                    Scheduled Unlock Time: <br/><strong style="font-size:13px; color:#6366f1; display:block; margin-top:6px;">{start_dt.strftime('%Y-%m-%d %H:%M')}</strong>
+                <div style="color:#f59e0b; font-size:44px; margin-bottom:14px;">🛑</div>
+                <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700;">Transmission Sealed</h2>
+                <p style="color:#94a3b8; font-size:13px; margin:0 0 16px 0; line-height:1.5;">This attendance scan gateway has not activated yet.</p>
+                <div style="background-color:#1e293b; padding:12px; border-radius:10px; font-family:monospace; font-size:12px; color:#94a3b8;">
+                    Scheduled Release: <br/><strong style="font-size:14px; color:#f59e0b; display:block; margin-top:4px;">{start_dt.strftime('%Y-%m-%d %H:%M')}</strong>
                 </div>
             </div>
         </div>
@@ -904,11 +972,11 @@ def mark(token):
         return f"""
         <div style="{PAGE_BODY_STYLE}">
             <div style="{PANEL_CARD_STYLE}">
-                <div style="color:#94a3b8; font-size:36px; margin-bottom:16px;">⚠️</div>
-                <h2 style="margin:0 0 6px 0; font-size:18px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">Verification Window Terminated</h2>
-                <p style="color:#94a3b8; font-size:13px; margin:0 0 20px 0; line-height:1.6;">The chronologically assigned parameters defining this telemetry lock have systematically elapsed.</p>
-                <div style="background-color:#1f2937; padding:12px; border-radius:10px; font-family:monospace; font-size:12px; color:#f43f5e; border:1px solid #374151;">
-                    Lifecycle Expiry Logged At: <br/><strong style="font-size:13px; color:#ffffff; display:block; margin-top:6px;">{end_dt.strftime('%Y-%m-%d %H:%M')}</strong>
+                <div style="color:#ef4444; font-size:44px; margin-bottom:14px;">⚠️</div>
+                <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700;">Gateway Terminated</h2>
+                <p style="color:#94a3b8; font-size:13px; margin:0 0 16px 0; line-height:1.5;">The verification timeout configuration limit has passed.</p>
+                <div style="background-color:#1e293b; padding:12px; border-radius:10px; font-family:monospace; font-size:12px; color:#f43f5e;">
+                    Terminated At: <br/><strong style="font-size:14px; color:#fff; display:block; margin-top:4px;">{end_dt.strftime('%Y-%m-%d %H:%M')}</strong>
                 </div>
             </div>
         </div>
@@ -926,12 +994,12 @@ def mark(token):
         return f"""
         <div style="{PAGE_BODY_STYLE}">
             <div style="{PANEL_CARD_STYLE}">
-                <div style="color:#3b82f6; font-size:36px; margin-bottom:16px;">🛡️</div>
-                <h2 style="margin:0 0 6px 0; font-size:18px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">Telemetry Signature Redundant</h2>
-                <p style="color:#94a3b8; font-size:13px; margin:0 0 16px 0; line-height:1.6;">Your explicit metric allocation inside this 24-hour block has already been successfully committed.</p>
-                <div style="border-top:1px solid #273142; padding-top:16px;">
-                    <h3 style="color:#ffffff; margin:0; font-size:15px; font-weight:600;">{name}</h3>
-                    <p style="color:#3b82f6; font-size:10px; text-transform:uppercase; font-weight:bold; margin-top:4px; letter-spacing:1px;">Verification Status: Confirmed</p>
+                <div style="color:#3b82f6; font-size:44px; margin-bottom:14px;">🔁</div>
+                <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700;">Telemetry Authenticated</h2>
+                <p style="color:#94a3b8; font-size:13px; margin:0 0 14px 0; line-height:1.5;">Your daily log allocation has already been safely committed.</p>
+                <div style="border-top:1px solid #1e293b; padding-top:14px;">
+                    <h3 style="color:#ffffff; margin:0; font-size:17px; font-weight:600;">{name}</h3>
+                    <p style="color:#3b82f6; font-size:11px; text-transform:uppercase; font-weight:bold; margin-top:3px; letter-spacing:0.5px;">Status: Validated</p>
                 </div>
             </div>
         </div>
@@ -950,12 +1018,12 @@ def mark(token):
     return f"""
     <div style="{PAGE_BODY_STYLE}">
         <div style="{PANEL_CARD_STYLE}">
-            <div style="color:#10b981; font-size:36px; margin-bottom:16px;">✓</div>
-            <h2 style="margin:0 0 6px 0; font-size:18px; font-weight:700; color:#10b981; font-family:'Plus Jakarta Sans',sans-serif;">Telemetry Log Sequenced</h2>
-            <p style="color:#94a3b8; font-size:13px; margin:0 0 20px 0; line-height:1.6;">Operational attendance data successfully mapped to the master database node pipeline logs.</p>
-            <div style="background:rgba(16,185,129,0.02); border:1px solid rgba(16,185,129,0.15); padding:16px; border-radius:10px;">
-                <h3 style="color:#ffffff; margin:0; font-size:15px; font-weight:600;">{name}</h3>
-                <p style="color:#10b981; font-family:monospace; margin-top:4px; font-size:11px; font-weight:500;">{time_str}</p>
+            <div style="color:#10b981; font-size:44px; margin-bottom:14px;">✅</div>
+            <h2 style="margin:0 0 6px 0; font-size:20px; font-weight:700; color:#10b981;">Log Comitted Successfully</h2>
+            <p style="color:#94a3b8; font-size:13px; margin:0 0 16px 0; line-height:1.5;">Attendance has been successfully written to the mainframe database logs.</p>
+            <div style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.15); padding:14px; border-radius:10px;">
+                <h3 style="color:#ffffff; margin:0; font-size:17px; font-weight:600;">{name}</h3>
+                <p style="color:#10b981; font-size:11px; font-family:monospace; margin-top:3px; font-weight:bold;">{time_str}</p>
             </div>
         </div>
     </div>
