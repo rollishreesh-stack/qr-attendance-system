@@ -343,7 +343,7 @@ def mark(token):
     start_time = data[1]
     end_time = data[2]
 
-    # Keeping your current timezone configuration (+4 hours over UTC)
+    # Timezone calculation setup (+4 hours over UTC)
     now = datetime.utcnow() + timedelta(hours=4)
 
     start_dt = datetime.strptime(start_time, "%Y-%m-%dT%H:%M")
