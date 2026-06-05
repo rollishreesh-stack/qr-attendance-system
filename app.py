@@ -97,13 +97,37 @@ LAYOUT_TEMPLATE = """
         (function(){
             emailjs.init("-oGl3hn1HEMpvxh2T");
         })();
+        
+        // Premium Accordion Toggle Logic
+        function toggleSection(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                // Small delay to allow display:block to apply before animating opacity
+                setTimeout(() => {
+                    content.classList.remove('opacity-0', '-translate-y-4');
+                    content.classList.add('opacity-100', 'translate-y-0');
+                }, 10);
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.remove('opacity-100', 'translate-y-0');
+                content.classList.add('opacity-0', '-translate-y-4');
+                icon.classList.remove('rotate-180');
+                // Wait for animation to finish before hiding completely
+                setTimeout(() => {
+                    content.classList.add('hidden');
+                }, 300);
+            }
+        }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #030712; /* Deep executive black */
+            background-color: #030712; 
             background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, transparent 70%);
             background-attachment: fixed;
         }
@@ -121,9 +145,14 @@ LAYOUT_TEMPLATE = """
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Smooth fade animation for slider */
+        /* Fast smooth fade animation for slider */
         .fade-transition {
-            transition: opacity 1.5s ease-in-out;
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        /* Accordion transition utility */
+        .accordion-content {
+            transition: all 0.3s ease-in-out;
         }
     </style>
 </head>
@@ -146,13 +175,13 @@ LAYOUT_TEMPLATE = """
                 <i class="fa-solid fa-house text-lg w-6 text-center text-slate-500"></i> Home Gateway
             </a>
             <a href="/dashboard" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
-                <i class="fa-solid fa-chart-pie text-lg w-6 text-center text-indigo-400"></i> Analytics Dashboard
+                <i class="fa-solid fa-layer-group text-lg w-6 text-center text-indigo-400"></i> Command Center
             </a>
             <a href="/bulk" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
                 <i class="fa-solid fa-qrcode text-lg w-6 text-center text-emerald-400"></i> Bulk QR Engine
             </a>
             <a href="/analysis" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
-                <i class="fa-solid fa-chart-line text-lg w-6 text-center text-blue-400"></i> Performance Report
+                <i class="fa-solid fa-chart-line text-lg w-6 text-center text-blue-400"></i> Analytics Dashboard
             </a>
             <a href="/profile" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-slate-400 hover:bg-slate-800/40 hover:text-white hover:shadow-lg">
                 <i class="fa-solid fa-user-shield text-lg w-6 text-center text-amber-400"></i> Security Settings
@@ -338,20 +367,26 @@ def home():
     content = """
     <div class="w-full max-w-6xl mx-auto flex flex-col gap-8">
         
-        <div class="relative w-full h-[500px] rounded-3xl overflow-hidden border border-slate-700/50 shadow-2xl group">
+        <!-- Premium Motion Slider Header -->
+        <div class="relative w-full h-[550px] rounded-3xl overflow-hidden border border-slate-700/50 shadow-2xl group">
             
-            <div id="hero-slider-bg" class="absolute inset-0 bg-cover bg-center fade-transition opacity-50 scale-105 group-hover:scale-100 transition-transform duration-[10s]"></div>
+            <!-- Faster Sliding Background Images -->
+            <div id="hero-slider-bg" class="absolute inset-0 bg-cover bg-center fade-transition opacity-50 scale-105 group-hover:scale-100 transition-transform duration-[7s]"></div>
             
+            <!-- Gradient Overlay -->
             <div class="absolute inset-0 bg-gradient-to-r from-[#030712] via-[#030712]/80 to-transparent"></div>
             
+            <!-- Content Overlay -->
             <div class="relative z-10 h-full flex flex-col justify-center px-12 md:px-20 w-full md:w-3/4">
-                <div class="inline-flex p-4 bg-indigo-500/20 text-indigo-400 rounded-2xl border border-indigo-500/30 backdrop-blur-md mb-6 w-fit shadow-[0_0_30px_rgba(79,70,229,0.3)]">
-                    <i class="fa-solid fa-network-wired text-4xl"></i>
-                </div>
-                <h2 class="text-5xl md:text-6xl font-extrabold text-white tracking-tight font-outfit mb-6 leading-tight">
-                    Next-Gen <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">Attendance</span> Architecture.
+                
+                <h2 class="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-blue-400 to-emerald-400 tracking-widest font-outfit mb-2 drop-shadow-[0_0_20px_rgba(79,70,229,0.3)]">
+                    AIMCS
                 </h2>
-                <p class="text-lg text-slate-300 max-w-2xl leading-relaxed mb-8 font-light">
+                <h3 class="text-2xl md:text-3xl text-slate-300 font-light tracking-[0.2em] font-outfit mb-8 uppercase">
+                    Attendance Platform
+                </h3>
+                
+                <p class="text-lg text-slate-400 max-w-2xl leading-relaxed mb-10 font-light border-l-2 border-indigo-500 pl-6">
                     Instantaneous encrypted tracking, automated structural reporting, and granular lifecycle auditing workflows engineered for modern institutions.
                 </p>
                 <div class="flex gap-4">
@@ -363,11 +398,11 @@ def home():
         </div>
 
         <script>
-            // Executive Motion Pictures Slider Logic
+            // Accelerated Executive Motion Pictures Slider Logic
             const sliderImages = [
-                'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600', // Modern Office/Campus
-                'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=1600', // Tech Environment
-                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1600'  // Abstract Network
+                'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600',
+                'https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=1600',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1600'
             ];
             
             let currentImageIdx = 0;
@@ -378,100 +413,117 @@ def home():
                 
                 setTimeout(() => {
                     sliderElement.style.backgroundImage = `url('${sliderImages[currentImageIdx]}')`;
-                    sliderElement.style.opacity = '0.4'; // Maintain subtle opacity behind text
+                    sliderElement.style.opacity = '0.35'; // Maintain subtle opacity behind text
                     currentImageIdx = (currentImageIdx + 1) % sliderImages.length;
-                }, 1500); // Wait for fade out
+                }, 800); // Shorter wait for fade out
             }
 
             // Initialize first image immediately
             sliderElement.style.backgroundImage = `url('${sliderImages[0]}')`;
-            sliderElement.style.opacity = '0.4';
+            sliderElement.style.opacity = '0.35';
             currentImageIdx = 1;
             
-            // Start interval
-            setInterval(changeSlide, 6000);
+            // Fast interval for rapid motion transition
+            setInterval(changeSlide, 3500);
         </script>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
 
-# ================= DASHBOARD =================
+# ================= DASHBOARD (COMMAND CENTER) =================
 @app.route("/dashboard")
 @login_required
 def dashboard():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-
     c.execute("SELECT COUNT(*) FROM students")
     students = c.fetchone()[0]
-
     c.execute("SELECT COUNT(*) FROM attendance")
     attendance = c.fetchone()[0]
-
     conn.close()
 
     content = f"""
-    <div class="space-y-8 w-full max-w-7xl mx-auto">
-        <div class="border-b border-slate-800/50 pb-6 flex items-center justify-between">
-            <div>
-                <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Command Center</h2>
-                <p class="text-sm text-slate-400 mt-1">Real-time telemetry and infrastructure utilization.</p>
-            </div>
-            <div class="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400 text-xs font-bold tracking-widest uppercase">
-                Status: Optimal
+    <div class="space-y-6 w-full max-w-7xl mx-auto">
+        
+        <div class="mb-8">
+            <h2 class="text-4xl font-extrabold text-white tracking-tight font-outfit">Command Center</h2>
+            <p class="text-sm text-slate-400 mt-2">Operational oversight and infrastructure utilization parameters.</p>
+        </div>
+
+        <!-- Section 1: Telemetry Dropdown -->
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-700/50">
+            <button onclick="toggleSection('sect-telemetry')" class="w-full px-8 py-6 flex items-center justify-between bg-slate-900/50 hover:bg-indigo-500/10 transition-colors border-l-4 border-indigo-500 focus:outline-none">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><i class="fa-solid fa-satellite-dish"></i></div>
+                    <span class="text-lg font-bold text-white tracking-widest font-outfit uppercase">Live Platform Statistics</span>
+                </div>
+                <i id="icon-sect-telemetry" class="fa-solid fa-chevron-down text-indigo-400 transition-transform duration-300 rotate-180"></i>
+            </button>
+            
+            <div id="sect-telemetry" class="px-8 py-8 accordion-content opacity-100 translate-y-0">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-[#030712]/50 border border-slate-700/50 p-8 rounded-3xl flex items-center justify-between hover:border-indigo-500/50 transition-all">
+                        <div class="space-y-2">
+                            <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Registered Entities</p>
+                            <h3 class="text-5xl font-extrabold text-white tracking-tight font-outfit">{students}</h3>
+                        </div>
+                        <div class="h-16 w-16 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#030712]/50 border border-slate-700/50 p-8 rounded-3xl flex items-center justify-between hover:border-emerald-500/50 transition-all">
+                        <div class="space-y-2">
+                            <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Verified Signatures</p>
+                            <h3 class="text-5xl font-extrabold text-emerald-400 tracking-tight font-outfit">{attendance}</h3>
+                        </div>
+                        <div class="h-16 w-16 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#030712]/50 border border-slate-700/50 p-8 rounded-3xl flex items-center justify-between md:col-span-2 lg:col-span-1 hover:border-purple-500/50 transition-all">
+                        <div class="space-y-2">
+                            <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Database Engine</p>
+                            <h3 class="text-2xl font-extrabold text-white tracking-tight font-outfit mt-2">SQLite v3</h3>
+                            <p class="text-xs text-slate-500 font-mono">Encrypted Local Cluster</p>
+                        </div>
+                        <div class="h-16 w-16 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 text-purple-400 rounded-2xl flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-server"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between group hover:border-indigo-500/50 transition-colors">
-                <div class="space-y-2">
-                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Registered Entities</p>
-                    <h3 class="text-5xl font-extrabold text-white tracking-tight font-outfit">{students}</h3>
+        <!-- Section 2: Administrative Dropdown -->
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-700/50">
+            <button onclick="toggleSection('sect-admin')" class="w-full px-8 py-6 flex items-center justify-between bg-slate-900/50 hover:bg-emerald-500/10 transition-colors border-l-4 border-emerald-500 focus:outline-none">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-emerald-500/20 rounded-lg text-emerald-400"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <span class="text-lg font-bold text-white tracking-widest font-outfit uppercase">Core Administrative Tools</span>
                 </div>
-                <div class="h-16 w-16 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border border-indigo-500/30 text-indigo-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-            </div>
-
-            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between group hover:border-emerald-500/50 transition-colors">
-                <div class="space-y-2">
-                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Verified Signatures</p>
-                    <h3 class="text-5xl font-extrabold text-emerald-400 tracking-tight font-outfit">{attendance}</h3>
-                </div>
-                <div class="h-16 w-16 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-shield-check"></i>
-                </div>
-            </div>
-
-            <div class="glass-panel p-8 rounded-3xl flex items-center justify-between md:col-span-2 lg:col-span-1 group hover:border-purple-500/50 transition-colors">
-                <div class="space-y-2">
-                    <p class="text-xs font-bold tracking-widest text-slate-400 uppercase font-outfit">Database Engine</p>
-                    <h3 class="text-2xl font-extrabold text-white tracking-tight font-outfit mt-2">SQLite v3</h3>
-                    <p class="text-xs text-slate-500 font-mono">Encrypted Local Cluster</p>
-                </div>
-                <div class="h-16 w-16 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-500/30 text-purple-400 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-server"></i>
+                <i id="icon-sect-admin" class="fa-solid fa-chevron-down text-emerald-400 transition-transform duration-300 rotate-180"></i>
+            </button>
+            
+            <div id="sect-admin" class="px-8 py-8 accordion-content opacity-100 translate-y-0">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <a href="/bulk" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-indigo-500/10 rounded-2xl border border-slate-700/50 hover:border-indigo-500/50 text-center group transition-all">
+                        <i class="fa-solid fa-qrcode text-4xl text-indigo-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-bold text-white font-outfit tracking-wide">Generate Matrix Data</span>
+                    </a>
+                    <a href="/download" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-emerald-500/10 rounded-2xl border border-slate-700/50 hover:border-emerald-500/50 text-center group transition-all">
+                        <i class="fa-solid fa-file-excel text-4xl text-emerald-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-bold text-white font-outfit tracking-wide">Export Relational Excel</span>
+                    </a>
+                    <a href="/download_qrs" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-amber-500/10 rounded-2xl border border-slate-700/50 hover:border-amber-500/50 text-center group transition-all">
+                        <i class="fa-solid fa-box-archive text-4xl text-amber-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-bold text-white font-outfit tracking-wide">Download Token Archive</span>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="glass-panel rounded-3xl p-8 mt-8">
-            <h3 class="text-sm font-bold text-white uppercase tracking-widest font-outfit mb-6">Administrative Workflows</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <a href="/bulk" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-indigo-500/10 rounded-2xl border border-slate-700/50 hover:border-indigo-500/50 text-center group transition-all">
-                    <i class="fa-solid fa-qrcode text-4xl text-indigo-400 mb-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Generate Matrix Data</span>
-                </a>
-                <a href="/download" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-emerald-500/10 rounded-2xl border border-slate-700/50 hover:border-emerald-500/50 text-center group transition-all">
-                    <i class="fa-solid fa-file-excel text-4xl text-emerald-400 mb-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Export Relational Excel</span>
-                </a>
-                <a href="/download_qrs" class="flex flex-col items-center justify-center p-8 bg-[#030712]/50 hover:bg-amber-500/10 rounded-2xl border border-slate-700/50 hover:border-amber-500/50 text-center group transition-all">
-                    <i class="fa-solid fa-box-archive text-4xl text-amber-400 mb-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-sm font-bold text-white font-outfit tracking-wide">Download Token Archive</span>
-                </a>
-            </div>
-        </div>
     </div>
     """
     return render_template_string(LAYOUT_TEMPLATE, content=content)
@@ -507,24 +559,18 @@ def bulk():
 
                 token = secrets.token_hex(8)
 
-                # save in DB
                 c.execute("""
                 INSERT INTO students (name,email,token,start_time,end_time)
                 VALUES (?,?,?,?,?)
                 """, (name, email, token, start_time, end_time))
 
-                # ✅ ATTENDANCE LINK
                 qr_link = request.host_url + "mark/" + token
-
-                # ✅ ONLINE QR IMAGE (IMPORTANT FIX)
                 qr_image_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + qr_link
 
-                # optional local save (for download zip later)
                 img = qrcode.make(qr_link)
                 file_path = f"static/qrs/{name.replace(' ','_')}.png"
                 img.save(file_path)
 
-                # send to emailjs
                 js_students.append(f"{name},{email},{qr_link},{qr_image_url}")
 
                 success += 1
@@ -630,24 +676,23 @@ def analysis():
             df_logs['date_only'] = df_logs['time'].apply(lambda x: x.split()[0] if x else '')
             attendance_counts = df_logs.groupby('date_only').size()
 
-            plt.figure(figsize=(8, 4))
+            plt.figure(figsize=(10, 4))
             plt.gcf().patch.set_facecolor('#111827')
-            plt.gcf().patch.set_alpha(0.0) # Transparent background for the figure
+            plt.gcf().patch.set_alpha(0.0) 
             ax = plt.gca()
             ax.set_facecolor('#111827')
-            ax.patch.set_alpha(0.0) # Transparent background for the axes
+            ax.patch.set_alpha(0.0)
             
-            # Premium bar chart styling
-            bars = attendance_counts.plot(kind='bar', color='#4f46e5', width=0.5, ax=ax)
+            bars = attendance_counts.plot(kind='bar', color='#4f46e5', width=0.4, ax=ax)
             
-            ax.tick_params(colors='#94a3b8', labelsize=9)
+            ax.tick_params(colors='#94a3b8', labelsize=10)
             ax.spines['bottom'].set_color('#334155')
             ax.spines['left'].set_color('#334155')
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             ax.grid(axis='y', color='#334155', linestyle='--', alpha=0.3)
             
-            plt.title("Chronological Verification Frequency", color='#f8fafc', fontsize=12, pad=15, weight='bold', fontname='sans-serif')
+            plt.title("Chronological Verification Frequency", color='#f8fafc', fontsize=14, pad=15, weight='bold', fontname='sans-serif')
             plt.xticks(rotation=45, ha='right')
             plt.tight_layout()
             
@@ -679,24 +724,40 @@ def analysis():
         """
 
     content = f"""
-    <div class="space-y-8 w-full max-w-7xl mx-auto">
-        <div class="border-b border-slate-800/50 pb-6">
-            <h2 class="text-3xl font-extrabold text-white tracking-tight font-outfit">Intelligence Analytics</h2>
-            <p class="text-sm text-slate-400 mt-1">Cross-referencing configuration limits and real-time ingestion streams.</p>
+    <div class="space-y-6 w-full max-w-7xl mx-auto">
+        
+        <div class="mb-8">
+            <h2 class="text-4xl font-extrabold text-white tracking-tight font-outfit">Intelligence Analytics</h2>
+            <p class="text-sm text-slate-400 mt-2">Cross-referencing configuration limits and real-time ingestion streams.</p>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div class="xl:col-span-1 glass-panel rounded-3xl p-6 flex flex-col items-center justify-center border-t-4 border-t-indigo-500">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit mb-4 w-full text-left">Activity Plot</h3>
-                {f'<img src="{chart_url}" class="w-full drop-shadow-2xl" />' if chart_url else '<div class="text-slate-600 text-xs text-center py-20 font-medium border border-dashed border-slate-800 rounded-xl w-full">Insufficient data points to plot timeline.</div>'}
-            </div>
-            
-            <div class="xl:col-span-2 glass-panel rounded-3xl p-6 space-y-4 border-t-4 border-t-blue-500">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit">Active Cryptographic Tokens</h3>
-                    <span class="text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded font-mono border border-blue-500/20">{len(df_config)} Nodes</span>
+        <!-- Section 1: Visual Telemetry Dropdown -->
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-700/50">
+            <button onclick="toggleSection('sect-chart')" class="w-full px-8 py-6 flex items-center justify-between bg-slate-900/50 hover:bg-indigo-500/10 transition-colors border-l-4 border-indigo-500 focus:outline-none">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><i class="fa-solid fa-chart-area"></i></div>
+                    <span class="text-lg font-bold text-white tracking-widest font-outfit uppercase">Visual Telemetry Mapping</span>
                 </div>
-                <div class="overflow-x-auto rounded-xl border border-slate-800/50 bg-[#030712]/50">
+                <i id="icon-sect-chart" class="fa-solid fa-chevron-down text-indigo-400 transition-transform duration-300 rotate-180"></i>
+            </button>
+            <div id="sect-chart" class="px-8 py-8 accordion-content opacity-100 translate-y-0">
+                <div class="bg-[#030712]/50 border border-slate-700/50 rounded-2xl p-6 flex items-center justify-center">
+                    {f'<img src="{chart_url}" class="w-full max-w-4xl drop-shadow-2xl" />' if chart_url else '<div class="text-slate-600 text-xs text-center py-20 font-medium border border-dashed border-slate-800 rounded-xl w-full">Insufficient data points to plot timeline.</div>'}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Active Matrix Dropdown -->
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-700/50">
+            <button onclick="toggleSection('sect-matrix')" class="w-full px-8 py-6 flex items-center justify-between bg-slate-900/50 hover:bg-blue-500/10 transition-colors border-l-4 border-blue-500 focus:outline-none">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400"><i class="fa-solid fa-network-wired"></i></div>
+                    <span class="text-lg font-bold text-white tracking-widest font-outfit uppercase">Active Cryptographic Nodes</span>
+                </div>
+                <i id="icon-sect-matrix" class="fa-solid fa-chevron-down text-blue-400 transition-transform duration-300"></i>
+            </button>
+            <div id="sect-matrix" class="px-8 py-8 accordion-content hidden opacity-0 -translate-y-4">
+                <div class="overflow-x-auto rounded-2xl border border-slate-800/50 bg-[#030712]/50">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-900/80 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -713,23 +774,32 @@ def analysis():
             </div>
         </div>
 
-        <div class="glass-panel rounded-3xl p-6 border-t-4 border-t-emerald-500">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-outfit mb-6">Immutable Ledger Stream</h3>
-            <div class="overflow-hidden border border-slate-800/50 rounded-xl bg-[#030712]/50 shadow-inner">
-                <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 shadow-sm">
-                            <tr>
-                                <th class="px-6 py-4">Packet ID</th>
-                                <th class="px-6 py-4">Verified Subject</th>
-                                <th class="px-6 py-4">Network Timestamp</th>
-                                <th class="px-6 py-4">State</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {table_rows}
-                        </tbody>
-                    </table>
+        <!-- Section 3: Ledger Dropdown -->
+        <div class="glass-panel rounded-3xl overflow-hidden border border-slate-700/50">
+            <button onclick="toggleSection('sect-ledger')" class="w-full px-8 py-6 flex items-center justify-between bg-slate-900/50 hover:bg-emerald-500/10 transition-colors border-l-4 border-emerald-500 focus:outline-none">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-emerald-500/20 rounded-lg text-emerald-400"><i class="fa-solid fa-list-check"></i></div>
+                    <span class="text-lg font-bold text-white tracking-widest font-outfit uppercase">Immutable Ingestion Ledger</span>
+                </div>
+                <i id="icon-sect-ledger" class="fa-solid fa-chevron-down text-emerald-400 transition-transform duration-300"></i>
+            </button>
+            <div id="sect-ledger" class="px-8 py-8 accordion-content hidden opacity-0 -translate-y-4">
+                <div class="overflow-hidden border border-slate-800/50 rounded-2xl bg-[#030712]/50 shadow-inner">
+                    <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 shadow-sm">
+                                <tr>
+                                    <th class="px-6 py-4">Packet ID</th>
+                                    <th class="px-6 py-4">Verified Subject</th>
+                                    <th class="px-6 py-4">Network Timestamp</th>
+                                    <th class="px-6 py-4">State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {table_rows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
