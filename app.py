@@ -13,22 +13,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 
 # ================= SAFE GRAPHING ENGINE CONTEXT =================
-# We wrap this cleanly so Python gets its exact expected try/except structure
 CHARTS_ENABLED = True
 try:
     import matplotlib
-    matplotlib.use('Agg')  # Strictly configures headless background rendering
+    matplotlib.use('Agg')  # Configures headless background rendering for Linux servers
     import matplotlib.pyplot as plt
 except Exception as e:
-    print("SYSTEM NOTICE: Server environment lacks graphical drivers. Disabling analytics chart layer safely.")
+    print("SYSTEM NOTICE: Disabling analytics chart layer safely.")
     CHARTS_ENABLED = False
 
 # ================= APP INITIALIZATION =================
-app = Flask(__name__)
-app.secret_key = "supersecretkey"
-
-DB_NAME = "attendance.db"
-
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -120,7 +114,7 @@ LAYOUT_TEMPLATE = """
         })();
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #090d16; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #090d16; }
@@ -165,10 +159,10 @@ LAYOUT_TEMPLATE = """
         <div class="p-5 border-t border-slate-800/60">
             <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/50 flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-bold text-xs shadow-md">
-                    {{ current_user.username[0].upper() }}
+                    {{ current_user.username[0].upper() if current_user.username else 'A' }}
                 </div>
                 <div class="truncate">
-                    <p class="text-xs font-bold text-white truncate">{0}</p>
+                    <p class="text-xs font-bold text-white truncate">{{ current_user.username }}</p>
                     <p class="text-[9px] font-mono text-emerald-400 uppercase tracking-wider">SECURE CONNECTED</p>
                 </div>
             </div>
@@ -202,7 +196,7 @@ LAYOUT_TEMPLATE = """
     </script>
 </body>
 </html>
-""".format(current_user.username if current_user.is_authenticated else "GUEST")
+"""
 
 # ================= LOGIN ROUTE =================
 @app.route("/login", methods=["GET", "POST"])
@@ -840,8 +834,6 @@ def zip_qr():
     return send_file("qrs.zip",as_attachment=True)
 
 # ================= RUN ENGINE =================
-if __name__ == '__main__':
-    import os
-    # Permanent cloud-safe port binding
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
